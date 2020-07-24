@@ -26,6 +26,8 @@ For correspondences, one dimensions is the date of correspondence which can be s
 
 For reviews, there dimensions such as book, author, genre, rating, review date, publication platform.
 
+- selecting subsets and its impact on salient characteristics
+- types of sampling
 
 ### Extracting and Structuring at different Scales
 
