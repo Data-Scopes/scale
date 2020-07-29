@@ -12,9 +12,9 @@ The online review dataset contains review text and metadata for [15 million book
 
 Notebooks:
 
-- [Transforming JSON dumps to CSV for analysis with Python and Pandas](./notebooks/Transforming-JSON-dumps-to-CSV-for-Pandas-analysis.ipynb)
-- [Filtering Goodreads Reviews](./notebooks/Filtering-Goodreads-Reviews.ipynb)
-- [Merging datasets](./notebooks/Merging-datasets.ipynb)
+- [Transforming JSON dumps to CSV for analysis with Python and Pandas](./notebooks/Transforming-JSON-dumps-to-CSV-for-Pandas-analysis.html)
+- [Filtering Goodreads reviews](./notebooks/Filtering-Goodreads-Reviews.html) ([.ipynb version](./notebooks/Filtering-Goodreads-Reviews.ipynb))
+- [Merging datasets](./notebooks/Merging-datasets.html)
 
 ### Distributions
 
@@ -25,7 +25,7 @@ Datasets with multiple records have elements that can be analysed across all or 
 
 Notebooks:
 
-- [Analysing distributions](./notebooks/Analysing-Distributions.ipynb)
+- [Analysing and interpreting distributions](./notebooks/Analysing-Distributions.html)
 
 ### Getting an Overview at Different Scales
 
@@ -40,8 +40,8 @@ For reviews, there dimensions such as book, author, genre, rating, review date, 
 
 Notebooks:
 
-- [EMLO Correspondence - collection Analysis](./notebooks/EMLO-collection-analysis.ipynb)
-- [Goodreads reviews - content analysis](./notebooks/Goodreads-Content-Analysis.ipynb)
+- [EMLO correspondence - collection Analysis](./notebooks/EMLO-collection-analysis.html)
+- [Goodreads reviews - content analysis](./notebooks/Goodreads-Content-Analysis.html)
 
 ### Extracting and Structuring Information at different Scales
 
