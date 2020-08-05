@@ -26,7 +26,7 @@ Datasets with multiple records have elements that can be analysed across all or 
 
 Notebooks:
 
-- [Analysing and interpreting distributions](./notebooks/Analysing-Distributions.html)
+- [Analysing and interpreting distributions](./notebooks/Analysing-Distributions.html) ([.ipynb version](./notebooks/Analysing-Distributions.ipynb))
 
 ### Getting an Overview at Different Scales
 
@@ -41,7 +41,7 @@ For reviews, there dimensions such as book, author, genre, rating, review date, 
 
 Notebooks:
 
-- [EMLO correspondence - collection Analysis](./notebooks/EMLO-collection-analysis.html)
+- [EMLO correspondence - collection Analysis](./notebooks/EMLO-collection-analysis.html) ([.ipynb version](./notebooks/EMLO-collection-analysis.ipynb))
 - [Goodreads reviews - content analysis - popular books](./notebooks/Goodreads-Content-Analysis-Popular-Books.html) ([.ipynb version](./notebooks/Goodreads-Content-Analysis-Popular-Books.ipynb))
 - [Goodreads reviews - content analysis - random sample](./notebooks/Goodreads-Content-Analysis-Random-Sample.html) ([.ipynb version](./notebooks/Goodreads-Content-Analysis-Random-Sample.ipynb))
 - [Goodreads reviews - content analysis - comparing genres](./notebooks/Goodreads-Content-Analysis-Comparing-Genres.html) ([.ipynb version](./notebooks/Goodreads-Content-Analysis-Comparing-Genres.ipynb))
