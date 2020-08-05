@@ -12,9 +12,10 @@ The online review dataset contains review text and metadata for [15 million book
 
 Notebooks:
 
-- [Transforming JSON dumps to CSV for analysis with Python and Pandas](./notebooks/Transforming-JSON-dumps-to-CSV-for-Pandas-analysis.html)
+- [Transforming JSON dumps to CSV for analysis with Python and Pandas](./notebooks/Transforming-JSON-dumps-to-CSV-for-Pandas-analysis.html) ([.ipynb version](./notebooks/Transforming-JSON-dumps-to-CSV-for-Pandas-analysis.ipynb))
+- [Transforming revewis to spacy docs](./notebooks/Transforming-reviews-to-spacy-docs.html) ([.ipynb version](./notebooks/Transforming-reviews-to-spacy-docs.ipynb))
 - [Filtering Goodreads reviews](./notebooks/Filtering-Goodreads-Reviews.html) ([.ipynb version](./notebooks/Filtering-Goodreads-Reviews.ipynb))
-- [Merging datasets](./notebooks/Merging-datasets.html)
+- [Merging datasets](./notebooks/Merging-datasets.html) ([.ipynb version](./notebooks/Merging-datasets.ipynb))
 
 ### Distributions
 
@@ -41,7 +42,9 @@ For reviews, there dimensions such as book, author, genre, rating, review date, 
 Notebooks:
 
 - [EMLO correspondence - collection Analysis](./notebooks/EMLO-collection-analysis.html)
-- [Goodreads reviews - content analysis](./notebooks/Goodreads-Content-Analysis.html)
+- [Goodreads reviews - content analysis - popular books](./notebooks/Goodreads-Content-Analysis-Popular-Books.html) ([.ipynb version](./notebooks/Goodreads-Content-Analysis-Popular-Books.ipynb))
+- [Goodreads reviews - content analysis - random sample](./notebooks/Goodreads-Content-Analysis-Random-Sample.html) ([.ipynb version](./notebooks/Goodreads-Content-Analysis-Random-Sample.ipynb))
+- [Goodreads reviews - content analysis - comparing genres](./notebooks/Goodreads-Content-Analysis-Comparing-Genres.html) ([.ipynb version](./notebooks/Goodreads-Content-Analysis-Comparing-Genres.ipynb))
 
 ### Extracting and Structuring Information at different Scales
 

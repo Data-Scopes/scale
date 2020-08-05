@@ -13102,7 +13102,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># This reload library is just used for developing the REPUBLIC hOCR parser </span>
@@ -13634,20 +13634,7 @@ Name: review_length, dtype: int64</pre>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[13]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span> 
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># the filtered review file excludes text and non-reviews</span>
@@ -13668,7 +13655,7 @@ Name: review_length, dtype: int64</pre>
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[4]:</div>
+    <div class="prompt output_prompt">Out[3]:</div>
 
 
 
@@ -13867,6 +13854,54 @@ Name: review_length, dtype: int64</pre>
 
 </div>
 
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">dateutil.parser</span> <span class="k">import</span> <span class="n">parse</span><span class="p">,</span> <span class="n">tz</span>
+
+<span class="k">def</span> <span class="nf">parse_date</span><span class="p">(</span><span class="n">date_str</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">parse</span><span class="p">(</span><span class="n">date_str</span><span class="p">)</span><span class="o">.</span><span class="n">astimezone</span><span class="p">(</span><span class="n">utc</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+<span class="n">utc</span> <span class="o">=</span> <span class="n">tz</span><span class="o">.</span><span class="n">gettz</span><span class="p">(</span><span class="s1">&#39;UTC&#39;</span><span class="p">)</span>
+
+<span class="c1">#book_df = pd.read_csv(book_file, sep=&#39;\t&#39;, compression=&#39;gzip&#39;)</span>
+
+<span class="c1">#book_df[[&#39;book_id&#39;, &#39;work_id&#39;]]</span>
+<span class="c1">#review_df = pd.merge(review_df, book_df[[&#39;book_id&#39;, &#39;work_id&#39;]], on=&#39;book_id&#39;, how=&#39;left&#39;)</span>
+
+<span class="n">review_df</span><span class="p">[</span><span class="s1">&#39;date_added&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">review_df</span><span class="o">.</span><span class="n">date_added</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">parse_date</span><span class="p">)</span>
+<span class="n">review_df</span><span class="p">[</span><span class="s1">&#39;date_updated&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">review_df</span><span class="o">.</span><span class="n">date_updated</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">parse_date</span><span class="p">)</span>
+<span class="n">review_df</span><span class="p">[</span><span class="s1">&#39;read_at&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">review_df</span><span class="o">.</span><span class="n">read_at</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">parse_date</span><span class="p">)</span>
+<span class="n">review_df</span><span class="p">[</span><span class="s1">&#39;started_at&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">review_df</span><span class="o">.</span><span class="n">started_at</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">parse_date</span><span class="p">)</span>
+
+<span class="n">review_df</span><span class="o">.</span><span class="n">columns</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">review_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">review_filtered_file</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">)</span>
+    
+<span class="c1">#review_df = pd.read_csv(review_filtered_file, sep=&#39;\t&#39;, compression=&#39;gzip&#39;)</span>
+</pre></div>
+
+    </div>
 </div>
 </div>
 

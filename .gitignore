@@ -1,1 +1,3 @@
-notebooks/.ipynb_check_points/*
+notebooks/.ipynb_checkpoints/
+*/__pycache__/*
+data/GoodReads

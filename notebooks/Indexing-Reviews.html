@@ -14213,11 +14213,11 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">spacy</span>
-<span class="kn">from</span> <span class="nn">helper</span> <span class="k">import</span> <span class="n">scroll_hits</span>
+<span class="kn">from</span> <span class="nn">scripts.helper</span> <span class="k">import</span> <span class="n">scroll_hits</span>
 <span class="kn">from</span> <span class="nn">elasticsearch.helpers</span> <span class="k">import</span> <span class="n">bulk</span>
 
 <span class="k">def</span> <span class="nf">make_token</span><span class="p">(</span><span class="n">token</span><span class="p">):</span>
@@ -14239,12 +14239,14 @@ div#notebook {
     <span class="p">}</span>
     <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;_index&#39;</span><span class="p">:</span> <span class="n">sent_index</span><span class="p">,</span> <span class="s1">&#39;_type&#39;</span><span class="p">:</span> <span class="s1">&#39;sentence&#39;</span><span class="p">,</span> <span class="s1">&#39;_id&#39;</span><span class="p">:</span> <span class="n">sent_doc</span><span class="p">[</span><span class="s1">&#39;sent_id&#39;</span><span class="p">],</span> <span class="s1">&#39;_source&#39;</span><span class="p">:</span><span class="n">sent_doc</span><span class="p">}</span>
 
-<span class="k">def</span> <span class="nf">index_sentences</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">nlp</span><span class="p">,</span> <span class="n">start_hi</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">index_sentences</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">nlp</span><span class="p">):</span>
     <span class="n">sent_count</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">review_hits</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">sent_hits</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">skip_done</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">hi</span><span class="p">,</span> <span class="n">hit</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">scroll_hits</span><span class="p">(</span><span class="n">es</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">review_index</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">)):</span>
-        <span class="k">if</span> <span class="n">hi</span> <span class="o">&lt;</span> <span class="n">start_hi</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;num_words&#39;</span> <span class="ow">in</span> <span class="n">hit</span><span class="p">[</span><span class="s1">&#39;_source&#39;</span><span class="p">]:</span>
+            <span class="n">skip_done</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">continue</span>
         <span class="n">review</span> <span class="o">=</span> <span class="n">hit</span><span class="p">[</span><span class="s1">&#39;_source&#39;</span><span class="p">]</span>
         <span class="n">spacy_doc</span> <span class="o">=</span> <span class="n">nlp</span><span class="p">(</span><span class="n">review</span><span class="p">[</span><span class="s1">&#39;review_text&#39;</span><span class="p">])</span>
@@ -14264,8 +14266,8 @@ div#notebook {
             <span class="n">review_hits</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">sent_hits</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">hi</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">100000</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">hi</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;reviews re-indexed</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">sent_count</span><span class="p">,</span> <span class="s1">&#39;sentences indexed&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">hi</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;reviews re-indexed</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">sent_count</span><span class="p">,</span> <span class="s1">&#39;sentences indexed&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">hi</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;reviews re-indexed</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">sent_count</span><span class="p">,</span> <span class="s1">&#39;sentences indexed&#39;</span><span class="p">,</span> <span class="n">skip_done</span><span class="p">,</span> <span class="s1">&#39;skipped&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">hi</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;reviews re-indexed</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">sent_count</span><span class="p">,</span> <span class="s1">&#39;sentences indexed&#39;</span><span class="p">,</span> <span class="n">skip_done</span><span class="p">,</span> <span class="s1">&#39;skipped&#39;</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -14337,7 +14339,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">nlp_en</span> <span class="o">=</span> <span class="n">spacy</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;en_core_web_lg&quot;</span><span class="p">)</span>
@@ -14354,8 +14356,8 @@ div#notebook {
 <span class="n">sent_index</span> <span class="o">=</span> <span class="s1">&#39;goodreads-ucsd-review-sents&#39;</span>
 
 
-<span class="n">start_hi</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="n">index_sentences</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">nlp_en</span><span class="p">,</span> <span class="n">start_hi</span><span class="o">=</span><span class="n">start_hi</span><span class="p">)</span>
+<span class="n">start_hi</span> <span class="o">=</span> <span class="mi">900000</span>
+<span class="n">index_sentences</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">nlp_en</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -14373,25 +14375,109 @@ div#notebook {
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>total hits: {&#39;value&#39;: 13896258, &#39;relation&#39;: &#39;eq&#39;}
-10000 reviews re-indexed	 88559 sentences indexed
-20000 reviews re-indexed	 198091 sentences indexed
-30000 reviews re-indexed	 312657 sentences indexed
-40000 reviews re-indexed	 400940 sentences indexed
-50000 reviews re-indexed	 495624 sentences indexed
-60000 reviews re-indexed	 614312 sentences indexed
-70000 reviews re-indexed	 699152 sentences indexed
-80000 reviews re-indexed	 787343 sentences indexed
-90000 reviews re-indexed	 873289 sentences indexed
-100000 reviews re-indexed	 995384 sentences indexed
-110000 reviews re-indexed	 1093568 sentences indexed
-120000 reviews re-indexed	 1200109 sentences indexed
-130000 reviews re-indexed	 1271175 sentences indexed
-140000 reviews re-indexed	 1352441 sentences indexed
-150000 reviews re-indexed	 1466254 sentences indexed
-160000 reviews re-indexed	 1562820 sentences indexed
-170000 reviews re-indexed	 1653328 sentences indexed
-180000 reviews re-indexed	 1813130 sentences indexed
+3900000 reviews re-indexed	 715707 sentences indexed 3827500 skipped
+4000000 reviews re-indexed	 1686418 sentences indexed 3827500 skipped
+4100000 reviews re-indexed	 2590983 sentences indexed 3827500 skipped
+4200000 reviews re-indexed	 3566111 sentences indexed 3827500 skipped
+4300000 reviews re-indexed	 4568845 sentences indexed 3827500 skipped
+4400000 reviews re-indexed	 5521449 sentences indexed 3827500 skipped
+4500000 reviews re-indexed	 6405159 sentences indexed 3827500 skipped
+4600000 reviews re-indexed	 7385377 sentences indexed 3827500 skipped
+4700000 reviews re-indexed	 8422710 sentences indexed 3827500 skipped
+4800000 reviews re-indexed	 9325070 sentences indexed 3827500 skipped
+4900000 reviews re-indexed	 10237135 sentences indexed 3827500 skipped
+5000000 reviews re-indexed	 11245748 sentences indexed 3827500 skipped
+5100000 reviews re-indexed	 12338540 sentences indexed 3827500 skipped
+5200000 reviews re-indexed	 13288523 sentences indexed 3827500 skipped
+5300000 reviews re-indexed	 14153911 sentences indexed 3827500 skipped
+5400000 reviews re-indexed	 15223096 sentences indexed 3827500 skipped
+5500000 reviews re-indexed	 16249936 sentences indexed 3827500 skipped
+5600000 reviews re-indexed	 17164762 sentences indexed 3827500 skipped
+5700000 reviews re-indexed	 18214611 sentences indexed 3827500 skipped
+5800000 reviews re-indexed	 19199445 sentences indexed 3827500 skipped
+5900000 reviews re-indexed	 20106212 sentences indexed 3827500 skipped
+6000000 reviews re-indexed	 20992696 sentences indexed 3827500 skipped
+6100000 reviews re-indexed	 21907724 sentences indexed 3827500 skipped
+6200000 reviews re-indexed	 22772742 sentences indexed 3827500 skipped
+6300000 reviews re-indexed	 23632225 sentences indexed 3827500 skipped
+6400000 reviews re-indexed	 24676587 sentences indexed 3827500 skipped
+6500000 reviews re-indexed	 25609332 sentences indexed 3827500 skipped
+6600000 reviews re-indexed	 26665755 sentences indexed 3827500 skipped
+6700000 reviews re-indexed	 27708987 sentences indexed 3827500 skipped
+6800000 reviews re-indexed	 28801099 sentences indexed 3827500 skipped
+6900000 reviews re-indexed	 29822057 sentences indexed 3827500 skipped
 </pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">KeyboardInterrupt</span>                         Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-3-c3f00aad15a8&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span><span class="ansi-blue-fg">()</span>
+<span class="ansi-green-intense-fg ansi-bold">     14</span> 
+<span class="ansi-green-intense-fg ansi-bold">     15</span> start_hi <span class="ansi-blue-fg">=</span> <span class="ansi-cyan-fg">900000</span>
+<span class="ansi-green-fg">---&gt; 16</span><span class="ansi-red-fg"> </span>index_sentences<span class="ansi-blue-fg">(</span>query<span class="ansi-blue-fg">,</span> nlp_en<span class="ansi-blue-fg">)</span>
+
+<span class="ansi-green-fg">&lt;ipython-input-2-0e875c5fc3a0&gt;</span> in <span class="ansi-cyan-fg">index_sentences</span><span class="ansi-blue-fg">(query, nlp)</span>
+<span class="ansi-green-intense-fg ansi-bold">     32</span>             <span class="ansi-green-fg">continue</span>
+<span class="ansi-green-intense-fg ansi-bold">     33</span>         review <span class="ansi-blue-fg">=</span> hit<span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">&#39;_source&#39;</span><span class="ansi-blue-fg">]</span>
+<span class="ansi-green-fg">---&gt; 34</span><span class="ansi-red-fg">         </span>spacy_doc <span class="ansi-blue-fg">=</span> nlp<span class="ansi-blue-fg">(</span>review<span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">&#39;review_text&#39;</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">     35</span>         review<span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">&#39;num_chars&#39;</span><span class="ansi-blue-fg">]</span> <span class="ansi-blue-fg">=</span> len<span class="ansi-blue-fg">(</span>review<span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">&#39;review_text&#39;</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">     36</span>         review<span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">&#39;num_words&#39;</span><span class="ansi-blue-fg">]</span> <span class="ansi-blue-fg">=</span> len<span class="ansi-blue-fg">(</span>spacy_doc<span class="ansi-blue-fg">)</span>
+
+<span class="ansi-green-fg">~/Library/Python/3.6/lib/python/site-packages/spacy/language.py</span> in <span class="ansi-cyan-fg">__call__</span><span class="ansi-blue-fg">(self, text, disable, component_cfg)</span>
+<span class="ansi-green-intense-fg ansi-bold">    444</span>             <span class="ansi-green-fg">if</span> <span class="ansi-green-fg">not</span> hasattr<span class="ansi-blue-fg">(</span>proc<span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">&#34;__call__&#34;</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">    445</span>                 <span class="ansi-green-fg">raise</span> ValueError<span class="ansi-blue-fg">(</span>Errors<span class="ansi-blue-fg">.</span>E003<span class="ansi-blue-fg">.</span>format<span class="ansi-blue-fg">(</span>component<span class="ansi-blue-fg">=</span>type<span class="ansi-blue-fg">(</span>proc<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">,</span> name<span class="ansi-blue-fg">=</span>name<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-fg">--&gt; 446</span><span class="ansi-red-fg">             </span>doc <span class="ansi-blue-fg">=</span> proc<span class="ansi-blue-fg">(</span>doc<span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">**</span>component_cfg<span class="ansi-blue-fg">.</span>get<span class="ansi-blue-fg">(</span>name<span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">{</span><span class="ansi-blue-fg">}</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">    447</span>             <span class="ansi-green-fg">if</span> doc <span class="ansi-green-fg">is</span> <span class="ansi-green-fg">None</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">    448</span>                 <span class="ansi-green-fg">raise</span> ValueError<span class="ansi-blue-fg">(</span>Errors<span class="ansi-blue-fg">.</span>E005<span class="ansi-blue-fg">.</span>format<span class="ansi-blue-fg">(</span>name<span class="ansi-blue-fg">=</span>name<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span>
+
+<span class="ansi-green-fg">pipes.pyx</span> in <span class="ansi-cyan-fg">spacy.pipeline.pipes.Tagger.__call__</span><span class="ansi-blue-fg">()</span>
+
+<span class="ansi-green-fg">pipes.pyx</span> in <span class="ansi-cyan-fg">spacy.pipeline.pipes.Tagger.predict</span><span class="ansi-blue-fg">()</span>
+
+<span class="ansi-green-fg">~/Library/Python/3.6/lib/python/site-packages/thinc/neural/_classes/model.py</span> in <span class="ansi-cyan-fg">__call__</span><span class="ansi-blue-fg">(self, x)</span>
+<span class="ansi-green-intense-fg ansi-bold">    165</span>             Must match expected shape
+<span class="ansi-green-intense-fg ansi-bold">    166</span>         &#34;&#34;&#34;
+<span class="ansi-green-fg">--&gt; 167</span><span class="ansi-red-fg">         </span><span class="ansi-green-fg">return</span> self<span class="ansi-blue-fg">.</span>predict<span class="ansi-blue-fg">(</span>x<span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">    168</span> 
+<span class="ansi-green-intense-fg ansi-bold">    169</span>     <span class="ansi-green-fg">def</span> pipe<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">,</span> stream<span class="ansi-blue-fg">,</span> batch_size<span class="ansi-blue-fg">=</span><span class="ansi-cyan-fg">128</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">:</span>
+
+<span class="ansi-green-fg">~/Library/Python/3.6/lib/python/site-packages/thinc/api.py</span> in <span class="ansi-cyan-fg">predict</span><span class="ansi-blue-fg">(seqs_in)</span>
+<span class="ansi-green-intense-fg ansi-bold">    308</span>     <span class="ansi-green-fg">def</span> predict<span class="ansi-blue-fg">(</span>seqs_in<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">    309</span>         lengths <span class="ansi-blue-fg">=</span> layer<span class="ansi-blue-fg">.</span>ops<span class="ansi-blue-fg">.</span>asarray<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">[</span>len<span class="ansi-blue-fg">(</span>seq<span class="ansi-blue-fg">)</span> <span class="ansi-green-fg">for</span> seq <span class="ansi-green-fg">in</span> seqs_in<span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-fg">--&gt; 310</span><span class="ansi-red-fg">         </span>X <span class="ansi-blue-fg">=</span> layer<span class="ansi-blue-fg">(</span>layer<span class="ansi-blue-fg">.</span>ops<span class="ansi-blue-fg">.</span>flatten<span class="ansi-blue-fg">(</span>seqs_in<span class="ansi-blue-fg">,</span> pad<span class="ansi-blue-fg">=</span>pad<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">    311</span>         <span class="ansi-green-fg">return</span> layer<span class="ansi-blue-fg">.</span>ops<span class="ansi-blue-fg">.</span>unflatten<span class="ansi-blue-fg">(</span>X<span class="ansi-blue-fg">,</span> lengths<span class="ansi-blue-fg">,</span> pad<span class="ansi-blue-fg">=</span>pad<span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">    312</span> 
+
+<span class="ansi-green-fg">~/Library/Python/3.6/lib/python/site-packages/thinc/neural/_classes/model.py</span> in <span class="ansi-cyan-fg">__call__</span><span class="ansi-blue-fg">(self, x)</span>
+<span class="ansi-green-intense-fg ansi-bold">    165</span>             Must match expected shape
+<span class="ansi-green-intense-fg ansi-bold">    166</span>         &#34;&#34;&#34;
+<span class="ansi-green-fg">--&gt; 167</span><span class="ansi-red-fg">         </span><span class="ansi-green-fg">return</span> self<span class="ansi-blue-fg">.</span>predict<span class="ansi-blue-fg">(</span>x<span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">    168</span> 
+<span class="ansi-green-intense-fg ansi-bold">    169</span>     <span class="ansi-green-fg">def</span> pipe<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">,</span> stream<span class="ansi-blue-fg">,</span> batch_size<span class="ansi-blue-fg">=</span><span class="ansi-cyan-fg">128</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">:</span>
+
+<span class="ansi-green-fg">~/Library/Python/3.6/lib/python/site-packages/thinc/check.py</span> in <span class="ansi-cyan-fg">checked_function</span><span class="ansi-blue-fg">(wrapped, instance, args, kwargs)</span>
+<span class="ansi-green-intense-fg ansi-bold">    154</span>                     <span class="ansi-green-fg">raise</span> ExpectedTypeError<span class="ansi-blue-fg">(</span>check<span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">&#34;Callable&#34;</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">    155</span>                 check<span class="ansi-blue-fg">(</span>arg_id<span class="ansi-blue-fg">,</span> fix_args<span class="ansi-blue-fg">,</span> kwargs<span class="ansi-blue-fg">)</span>
+<span class="ansi-green-fg">--&gt; 156</span><span class="ansi-red-fg">         </span><span class="ansi-green-fg">return</span> wrapped<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">*</span>args<span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">**</span>kwargs<span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">    157</span> 
+<span class="ansi-green-intense-fg ansi-bold">    158</span>     <span class="ansi-green-fg">def</span> arg_check_adder<span class="ansi-blue-fg">(</span>func<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">:</span>
+
+<span class="ansi-green-fg">~/Library/Python/3.6/lib/python/site-packages/thinc/neural/_classes/softmax.py</span> in <span class="ansi-cyan-fg">predict</span><span class="ansi-blue-fg">(self, input__BI)</span>
+<span class="ansi-green-intense-fg ansi-bold">     18</span>     <span class="ansi-green-fg">def</span> predict<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">,</span> input__BI<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">:</span>
+<span class="ansi-green-intense-fg ansi-bold">     19</span>         output__BO <span class="ansi-blue-fg">=</span> self<span class="ansi-blue-fg">.</span>ops<span class="ansi-blue-fg">.</span>affine<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">.</span>W<span class="ansi-blue-fg">,</span> self<span class="ansi-blue-fg">.</span>b<span class="ansi-blue-fg">,</span> input__BI<span class="ansi-blue-fg">)</span>
+<span class="ansi-green-fg">---&gt; 20</span><span class="ansi-red-fg">         </span>self<span class="ansi-blue-fg">.</span>ops<span class="ansi-blue-fg">.</span>softmax<span class="ansi-blue-fg">(</span>output__BO<span class="ansi-blue-fg">,</span> inplace<span class="ansi-blue-fg">=</span><span class="ansi-green-fg">True</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">     21</span>         <span class="ansi-green-fg">return</span> output__BO
+<span class="ansi-green-intense-fg ansi-bold">     22</span> 
+
+<span class="ansi-red-fg">KeyboardInterrupt</span>: </pre>
 </div>
 </div>
 
