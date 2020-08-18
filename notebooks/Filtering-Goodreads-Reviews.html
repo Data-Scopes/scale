@@ -13523,11 +13523,13 @@ Name: review_length, dtype: int64</pre>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="prompt input_prompt">In&nbsp;[64]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># helper is a module with simple helper functions</span>
-<span class="kn">from</span> <span class="nn">helper</span> <span class="k">import</span> <span class="n">read_csv</span>
+<span class="kn">from</span> <span class="nn">langdetect</span> <span class="k">import</span> <span class="n">detect</span>
+<span class="kn">from</span> <span class="nn">langdetect.lang_detect_exception</span> <span class="k">import</span> <span class="n">LangDetectException</span>
+<span class="kn">from</span> <span class="nn">scripts.helper</span> <span class="k">import</span> <span class="n">read_csv</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">Counter</span>
 <span class="kn">import</span> <span class="nn">re</span>
 
@@ -13558,6 +13560,16 @@ Name: review_length, dtype: int64</pre>
     <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="s1">&#39;review_length&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">40</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span>
     <span class="k">return</span> <span class="n">is_empty</span><span class="p">(</span><span class="n">record</span><span class="p">)</span> <span class="ow">or</span> <span class="n">is_url</span><span class="p">(</span><span class="n">record</span><span class="p">)</span> <span class="ow">or</span> <span class="n">is_rating</span><span class="p">(</span><span class="n">record</span><span class="p">)</span> <span class="ow">or</span> <span class="n">is_date</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">lang_detect</span><span class="p">(</span><span class="n">record</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">detect</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s1">&#39;review_text&#39;</span><span class="p">])</span>
+    <span class="k">except</span> <span class="n">LangDetectException</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;unknown&#39;</span>
+
+<span class="k">def</span> <span class="nf">is_english</span><span class="p">(</span><span class="n">record</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">lang_detect</span> <span class="o">==</span> <span class="s1">&#39;en&#39;</span>
+    
 </pre></div>
 
     </div>
@@ -13860,7 +13872,7 @@ Name: review_length, dtype: int64</pre>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">dateutil.parser</span> <span class="k">import</span> <span class="n">parse</span><span class="p">,</span> <span class="n">tz</span>
@@ -13890,14 +13902,37 @@ Name: review_length, dtype: int64</pre>
 </div>
 </div>
 
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[9]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>Index([&#39;user_id&#39;, &#39;book_id&#39;, &#39;review_id&#39;, &#39;rating&#39;, &#39;date_added&#39;,
+       &#39;date_updated&#39;, &#39;read_at&#39;, &#39;started_at&#39;, &#39;n_votes&#39;, &#39;n_comments&#39;,
+       &#39;review_length&#39;, &#39;work_id&#39;],
+      dtype=&#39;object&#39;)</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">review_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">review_filtered_file</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">)</span>
-    
+
 <span class="c1">#review_df = pd.read_csv(review_filtered_file, sep=&#39;\t&#39;, compression=&#39;gzip&#39;)</span>
 </pre></div>
 
@@ -13922,13 +13957,19 @@ Name: review_length, dtype: int64</pre>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[38]:</div>
+<div class="prompt input_prompt">In&nbsp;[70]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">counts</span> <span class="o">=</span> <span class="n">review_df</span><span class="o">.</span><span class="n">book_id</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
 
 <span class="n">threshold</span> <span class="o">=</span> <span class="mi">10000</span>
-<span class="n">books_above_10k</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">book_id</span><span class="p">)</span> <span class="k">for</span> <span class="n">book_id</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">[</span><span class="n">counts</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">]</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()]</span>
+<span class="n">books_above_10k</span> <span class="o">=</span> <span class="p">[</span><span class="n">book_id</span> <span class="k">for</span> <span class="n">book_id</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">[</span><span class="n">counts</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">]</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()]</span>
+<span class="n">book_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">book_df</span><span class="p">[</span><span class="n">book_df</span><span class="o">.</span><span class="n">book_id</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">books_above_10k</span><span class="p">)]</span><span class="o">.</span><span class="n">book_id</span><span class="p">)</span>
+<span class="n">work_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">book_df</span><span class="p">[</span><span class="n">book_df</span><span class="o">.</span><span class="n">book_id</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">books_above_10k</span><span class="p">)]</span><span class="o">.</span><span class="n">work_id</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">books_above_10k</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">work_ids</span><span class="p">)</span>
+<span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">book_id</span><span class="p">):</span> <span class="n">work_id</span> <span class="k">for</span> <span class="n">book_id</span><span class="p">,</span> <span class="n">work_id</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">book_ids</span><span class="p">,</span> <span class="n">work_ids</span><span class="p">)}</span>
+<span class="n">books_above_10k</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">book_id</span><span class="p">)</span> <span class="k">for</span> <span class="n">book_id</span> <span class="ow">in</span> <span class="n">books_above_10k</span><span class="p">]</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;number of books with over </span><span class="si">{threshold}</span><span class="s1"> reviews:&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="n">counts</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">]))</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;number of reviews for books with over </span><span class="si">{threshold}</span><span class="s1"> reviews:&#39;</span><span class="p">,</span> <span class="nb">sum</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="n">counts</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">]))</span>
 
@@ -13936,8 +13977,8 @@ Name: review_length, dtype: int64</pre>
 <span class="n">sample_review_text_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s1">&#39;goodreads_reviews-books_above_10k_reviews.csv.gz&#39;</span><span class="p">)</span> <span class="c1"># includes text</span>
 
 <span class="n">headers</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;user_id&#39;</span><span class="p">,</span> <span class="s1">&#39;book_id&#39;</span><span class="p">,</span> <span class="s1">&#39;review_id&#39;</span><span class="p">,</span> <span class="s1">&#39;rating&#39;</span><span class="p">,</span> <span class="s1">&#39;date_added&#39;</span><span class="p">,</span> <span class="s1">&#39;date_updated&#39;</span><span class="p">,</span> <span class="s1">&#39;read_at&#39;</span><span class="p">,</span> <span class="s1">&#39;started_at&#39;</span><span class="p">,</span> 
-    <span class="s1">&#39;n_votes&#39;</span><span class="p">,</span> <span class="s1">&#39;n_comments&#39;</span><span class="p">,</span> <span class="s1">&#39;review_length&#39;</span><span class="p">,</span> <span class="s1">&#39;review_text&#39;</span>
+    <span class="s1">&#39;user_id&#39;</span><span class="p">,</span> <span class="s1">&#39;book_id&#39;</span><span class="p">,</span> <span class="s1">&#39;work_id&#39;</span><span class="p">,</span> <span class="s1">&#39;review_id&#39;</span><span class="p">,</span> <span class="s1">&#39;rating&#39;</span><span class="p">,</span> <span class="s1">&#39;date_added&#39;</span><span class="p">,</span> <span class="s1">&#39;date_updated&#39;</span><span class="p">,</span> <span class="s1">&#39;read_at&#39;</span><span class="p">,</span> <span class="s1">&#39;started_at&#39;</span><span class="p">,</span> 
+    <span class="s1">&#39;n_votes&#39;</span><span class="p">,</span> <span class="s1">&#39;n_comments&#39;</span><span class="p">,</span> <span class="s1">&#39;review_length&#39;</span><span class="p">,</span> <span class="s1">&#39;review_lang&#39;</span><span class="p">,</span> <span class="s1">&#39;review_text&#39;</span><span class="p">,</span> <span class="s1">&#39;review_lang&#39;</span>
 <span class="p">]</span>
 
 <span class="k">with</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">sample_review_text_file</span><span class="p">,</span> <span class="s1">&#39;wt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
@@ -13946,6 +13987,8 @@ Name: review_length, dtype: int64</pre>
     <span class="k">for</span> <span class="n">review</span> <span class="ow">in</span> <span class="n">read_csv</span><span class="p">(</span><span class="n">review_text_file</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">review</span><span class="p">[</span><span class="s1">&#39;book_id&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">books_above_10k</span><span class="p">:</span>
             <span class="k">continue</span>
+        <span class="n">review</span><span class="p">[</span><span class="s1">&#39;review_lang&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lang_detect</span><span class="p">(</span><span class="n">review</span><span class="p">)</span>
+        <span class="n">review</span><span class="p">[</span><span class="s1">&#39;work_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapping</span><span class="p">[</span><span class="n">review</span><span class="p">[</span><span class="s1">&#39;book_id&#39;</span><span class="p">]]</span>
         <span class="n">row</span> <span class="o">=</span> <span class="p">[</span><span class="n">review</span><span class="p">[</span><span class="n">header</span><span class="p">]</span> <span class="k">for</span> <span class="n">header</span> <span class="ow">in</span> <span class="n">headers</span><span class="p">]</span>
         <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
 </pre></div>
@@ -13964,9 +14007,10 @@ Name: review_length, dtype: int64</pre>
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>number of books with over 10000 reviews: 9
-number of reviews for books with over 10000 reviews: 121515
-[&#39;11870085&#39;, &#39;2767052&#39;, &#39;7260188&#39;, &#39;22557272&#39;, &#39;6148028&#39;, &#39;19063&#39;, &#39;10818853&#39;, &#39;13335037&#39;, &#39;41865&#39;]
+<pre>[11870085, 2767052, 29056083, 20309175, 7260188, 22557272, 5470, 6148028, 19063, 10818853, 13335037, 41865]
+[8812783, 15732562, 2792775, 3212258, 878368, 153313, 153313, 6171458, 41107568, 16827462, 48765776, 48765776, 28143699, 28143699, 28143699, 28143699, 28143699, 28143699, 28143699, 28143699, 28143699, 28143699, 28143699, 13155899]
+number of books with over 10000 reviews: 12
+number of reviews for books with over 10000 reviews: 167512
 </pre>
 </div>
 </div>
@@ -13977,34 +14021,46 @@ number of reviews for books with over 10000 reviews: 121515
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[40]:</div>
+<div class="prompt input_prompt">In&nbsp;[66]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">counts</span> <span class="o">=</span> <span class="n">review_df</span><span class="o">.</span><span class="n">user_id</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">scripts.helper</span> <span class="k">import</span> <span class="n">read_csv</span>
 
-<span class="n">threshold</span> <span class="o">=</span> <span class="mi">5000</span>
-<span class="n">users_above_5k</span> <span class="o">=</span> <span class="p">[</span><span class="n">user_id</span> <span class="k">for</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">[</span><span class="n">counts</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">]</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()]</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;number of users with over </span><span class="si">{threshold}</span><span class="s1"> reviews:&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="n">counts</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">]))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;number of reviews for users with over </span><span class="si">{threshold}</span><span class="s1"> reviews:&#39;</span><span class="p">,</span> <span class="nb">sum</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="n">counts</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">]))</span>
+<span class="n">counts</span> <span class="o">=</span> <span class="n">review_df</span><span class="o">.</span><span class="n">work_id</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+
+<span class="n">threshold</span> <span class="o">=</span> <span class="mi">10000</span>
+<span class="n">works_above_10k</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">work_id</span><span class="p">)</span> <span class="k">for</span> <span class="n">work_id</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">[</span><span class="n">counts</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">]</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">works_above_10k</span><span class="p">)</span>
+<span class="n">book_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">book_id</span><span class="p">)</span> <span class="k">for</span> <span class="n">book_id</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">book_df</span><span class="p">[</span><span class="n">book_df</span><span class="o">.</span><span class="n">work_id</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">works_above_10k</span><span class="p">)]</span><span class="o">.</span><span class="n">book_id</span><span class="p">)])</span>
+<span class="n">work_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">book_df</span><span class="p">[</span><span class="n">book_df</span><span class="o">.</span><span class="n">work_id</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">works_above_10k</span><span class="p">)]</span><span class="o">.</span><span class="n">work_id</span><span class="p">)</span>
+<span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">book_id</span><span class="p">):</span> <span class="n">work_id</span> <span class="k">for</span> <span class="n">book_id</span><span class="p">,</span> <span class="n">work_id</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">book_ids</span><span class="p">,</span> <span class="n">work_ids</span><span class="p">)}</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;number of works with over </span><span class="si">{threshold}</span><span class="s1"> reviews:&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="n">counts</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">]))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;number of reviews for works with over </span><span class="si">{threshold}</span><span class="s1"> reviews:&#39;</span><span class="p">,</span> <span class="nb">sum</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="n">counts</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">]))</span>
 
 <span class="n">data_dir</span> <span class="o">=</span> <span class="s1">&#39;/Volumes/Samsung_T5/Data/Book-Reviews/GoodReads/&#39;</span>
-<span class="n">sample_review_text_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s1">&#39;goodreads_reviews-reviewers_above_5k_reviews.csv.gz&#39;</span><span class="p">)</span> <span class="c1"># includes text</span>
+<span class="n">sample_review_text_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s1">&#39;goodreads_reviews-works_above_10k_reviews.csv.gz&#39;</span><span class="p">)</span> <span class="c1"># includes text</span>
 
 <span class="n">headers</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;user_id&#39;</span><span class="p">,</span> <span class="s1">&#39;book_id&#39;</span><span class="p">,</span> <span class="s1">&#39;review_id&#39;</span><span class="p">,</span> <span class="s1">&#39;rating&#39;</span><span class="p">,</span> <span class="s1">&#39;date_added&#39;</span><span class="p">,</span> <span class="s1">&#39;date_updated&#39;</span><span class="p">,</span> <span class="s1">&#39;read_at&#39;</span><span class="p">,</span> <span class="s1">&#39;started_at&#39;</span><span class="p">,</span> 
-    <span class="s1">&#39;n_votes&#39;</span><span class="p">,</span> <span class="s1">&#39;n_comments&#39;</span><span class="p">,</span> <span class="s1">&#39;review_length&#39;</span><span class="p">,</span> <span class="s1">&#39;review_text&#39;</span>
+    <span class="s1">&#39;user_id&#39;</span><span class="p">,</span> <span class="s1">&#39;book_id&#39;</span><span class="p">,</span> <span class="s1">&#39;work_id&#39;</span><span class="p">,</span> <span class="s1">&#39;review_id&#39;</span><span class="p">,</span> <span class="s1">&#39;rating&#39;</span><span class="p">,</span> <span class="s1">&#39;date_added&#39;</span><span class="p">,</span> <span class="s1">&#39;date_updated&#39;</span><span class="p">,</span> <span class="s1">&#39;read_at&#39;</span><span class="p">,</span> <span class="s1">&#39;started_at&#39;</span><span class="p">,</span> 
+    <span class="s1">&#39;n_votes&#39;</span><span class="p">,</span> <span class="s1">&#39;n_comments&#39;</span><span class="p">,</span> <span class="s1">&#39;review_length&#39;</span><span class="p">,</span> <span class="s1">&#39;review_lang&#39;</span><span class="p">,</span> <span class="s1">&#39;review_text&#39;</span><span class="p">,</span> <span class="s1">&#39;review_lang&#39;</span>
 <span class="p">]</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">users_above_5k</span><span class="p">)</span>
 
 <span class="k">with</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">sample_review_text_file</span><span class="p">,</span> <span class="s1">&#39;wt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
     <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">fh</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">headers</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">review</span> <span class="ow">in</span> <span class="n">read_csv</span><span class="p">(</span><span class="n">review_text_file</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">review</span><span class="p">[</span><span class="s1">&#39;user_id&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">users_above_5k</span><span class="p">:</span>
+    <span class="n">written</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">ri</span><span class="p">,</span> <span class="n">review</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">read_csv</span><span class="p">(</span><span class="n">review_text_file</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">ri</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">1000000</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">ri</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;reviews parsed&#39;</span><span class="p">,</span> <span class="n">written</span><span class="p">,</span> <span class="s1">&#39;written&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">review</span><span class="p">[</span><span class="s1">&#39;book_id&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">book_ids</span><span class="p">:</span>
             <span class="k">continue</span>
+        <span class="n">review</span><span class="p">[</span><span class="s1">&#39;review_lang&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lang_detect</span><span class="p">(</span><span class="n">review</span><span class="p">)</span>
+        <span class="n">review</span><span class="p">[</span><span class="s1">&#39;work_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapping</span><span class="p">[</span><span class="n">review</span><span class="p">[</span><span class="s1">&#39;book_id&#39;</span><span class="p">]]</span>
+        <span class="n">written</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">row</span> <span class="o">=</span> <span class="p">[</span><span class="n">review</span><span class="p">[</span><span class="n">header</span><span class="p">]</span> <span class="k">for</span> <span class="n">header</span> <span class="ow">in</span> <span class="n">headers</span><span class="p">]</span>
         <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ri</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;reviews parsed&#39;</span><span class="p">,</span> <span class="n">written</span><span class="p">,</span> <span class="s1">&#39;written&#39;</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -14021,32 +14077,517 @@ number of reviews for books with over 10000 reviews: 121515
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>number of users with over 5000 reviews: 12
-number of reviews for users with over 5000 reviews: 98208
+<pre>[16827462, 48765776, 2792775, 28143699, 13306276, 13155899, 41107568, 8812783, 153313, 878368, 17763198, 6171458, 4640799, 15732562, 21825181, 15524549, 17225055, 14863741, 14345371, 3212258, 15545385, 2267189, 14245059, 15524542, 21861351, 4835472, 2754161, 3275794, 50459161]
+{&#39;17623911&#39;, &#39;7623768&#39;, &#39;17380203&#39;, &#39;6469151&#39;, &#39;848654&#39;, &#39;13533423&#39;, &#39;33229067&#39;, &#39;634951&#39;, &#39;1167751&#39;, &#39;27069714&#39;, &#39;25615225&#39;, &#39;22919918&#39;, &#39;6794926&#39;, &#39;35478512&#39;, &#39;20555501&#39;, &#39;20661705&#39;, &#39;18933600&#39;, &#39;20792791&#39;, &#39;23219487&#39;, &#39;32678493&#39;, &#39;31768151&#39;, &#39;23211741&#39;, &#39;18219043&#39;, &#39;25459160&#39;, &#39;24792411&#39;, &#39;742573&#39;, &#39;3708952&#39;, &#39;13517276&#39;, &#39;17225793&#39;, &#39;22747979&#39;, &#39;12783911&#39;, &#39;31224712&#39;, &#39;8045416&#39;, &#39;7631356&#39;, &#39;16071194&#39;, &#39;24483350&#39;, &#39;27281555&#39;, &#39;10783858&#39;, &#39;30652277&#39;, &#39;16039145&#39;, &#39;33285096&#39;, &#39;35547598&#39;, &#39;12658862&#39;, &#39;21464429&#39;, &#39;31333626&#39;, &#39;30129222&#39;, &#39;33638045&#39;, &#39;6703256&#39;, &#39;28421203&#39;, &#39;17841055&#39;, &#39;8376549&#39;, &#39;22444974&#39;, &#39;6565942&#39;, &#39;16049993&#39;, &#39;15780438&#39;, &#39;2728527&#39;, &#39;13541067&#39;, &#39;7561318&#39;, &#39;23562530&#39;, &#39;30332792&#39;, &#39;8146730&#39;, &#39;1175483&#39;, &#39;1029083&#39;, &#39;18717073&#39;, &#39;15719793&#39;, &#39;22907938&#39;, &#39;20634095&#39;, &#39;30306795&#39;, &#39;16100002&#39;, &#39;8775537&#39;, &#39;28352416&#39;, &#39;34615046&#39;, &#39;20765880&#39;, &#39;31450752&#39;, &#39;115233&#39;, &#39;24965395&#39;, &#39;5136453&#39;, &#39;14289293&#39;, &#39;18523885&#39;, &#39;1294624&#39;, &#39;7378684&#39;, &#39;3171676&#39;, &#39;32604784&#39;, &#39;34964436&#39;, &#39;1175482&#39;, &#39;32196033&#39;, &#39;18779332&#39;, &#39;15719795&#39;, &#39;29624161&#39;, &#39;6089758&#39;, &#39;6077978&#39;, &#39;9923043&#39;, &#39;25928461&#39;, &#39;19288043&#39;, &#39;24675652&#39;, &#39;17257607&#39;, &#39;19733543&#39;, &#39;25750832&#39;, &#39;12091570&#39;, &#39;15860667&#39;, &#39;18189665&#39;, &#39;13261812&#39;, &#39;10818853&#39;, &#39;23394970&#39;, &#39;22077269&#39;, &#39;18086425&#39;, &#39;3744438&#39;, &#39;12083073&#39;, &#39;21976013&#39;, &#39;32311968&#39;, &#39;5207452&#39;, &#39;20621490&#39;, &#39;18913703&#39;, &#39;12465069&#39;, &#39;15762884&#39;, &#39;11494324&#39;, &#39;35614220&#39;, &#39;653187&#39;, &#39;1811146&#39;, &#39;1032890&#39;, &#39;26029387&#39;, &#39;20804177&#39;, &#39;20760125&#39;, &#39;15723988&#39;, &#39;25492938&#39;, &#39;10339954&#39;, &#39;31140032&#39;, &#39;121121&#39;, &#39;7667056&#39;, &#39;25782431&#39;, &#39;9771265&#39;, &#39;26868374&#39;, &#39;16010180&#39;, &#39;20513634&#39;, &#39;15868&#39;, &#39;3207547&#39;, &#39;70740&#39;, &#39;9312497&#39;, &#39;3345529&#39;, &#39;27880360&#39;, &#39;7889219&#39;, &#39;8306706&#39;, &#39;13450845&#39;, &#39;24703950&#39;, &#39;23347115&#39;, &#39;17466045&#39;, &#39;20799366&#39;, &#39;6469152&#39;, &#39;6333218&#39;, &#39;1303749&#39;, &#39;11283315&#39;, &#39;24950272&#39;, &#39;7146518&#39;, &#39;12213207&#39;, &#39;22558519&#39;, &#39;17899904&#39;, &#39;17796487&#39;, &#39;20939592&#39;, &#39;18524290&#39;, &#39;31279693&#39;, &#39;4255&#39;, &#39;12386561&#39;, &#39;1090736&#39;, &#39;29855909&#39;, &#39;17697760&#39;, &#39;11019770&#39;, &#39;12058988&#39;, &#39;20895289&#39;, &#39;34171499&#39;, &#39;31201349&#39;, &#39;11506091&#39;, &#39;169182&#39;, &#39;11072324&#39;, &#39;22443450&#39;, &#39;19458358&#39;, &#39;28933083&#39;, &#39;7459906&#39;, &#39;22206765&#39;, &#39;6596839&#39;, &#39;6421355&#39;, &#39;17182122&#39;, &#39;12576748&#39;, &#39;12973516&#39;, &#39;12187803&#39;, &#39;20446165&#39;, &#39;22052749&#39;, &#39;32711626&#39;, &#39;15747213&#39;, &#39;14462380&#39;, &#39;18592792&#39;, &#39;8116091&#39;, &#39;18456083&#39;, &#39;22877052&#39;, &#39;20819401&#39;, &#39;27856546&#39;, &#39;20939738&#39;, &#39;18144590&#39;, &#39;30527969&#39;, &#39;25889880&#39;, &#39;2193926&#39;, &#39;11489526&#39;, &#39;23487535&#39;, &#39;23813546&#39;, &#39;28075512&#39;, &#39;1185972&#39;, &#39;25576955&#39;, &#39;21558662&#39;, &#39;11112731&#39;, &#39;28116469&#39;, &#39;23272156&#39;, &#39;15711759&#39;, &#39;12823877&#39;, &#39;33407095&#39;, &#39;22019444&#39;, &#39;29561070&#39;, &#39;34803847&#39;, &#39;6007025&#39;, &#39;87784&#39;, &#39;18085525&#39;, &#39;25570789&#39;, &#39;26050341&#39;, &#39;27468538&#39;, &#39;9970464&#39;, &#39;25532234&#39;, &#39;33964226&#39;, &#39;17736795&#39;, &#39;15871&#39;, &#39;18626824&#39;, &#39;17610151&#39;, &#39;3591974&#39;, &#39;22008879&#39;, &#39;10089874&#39;, &#39;16001467&#39;, &#39;25398136&#39;, &#39;34119033&#39;, &#39;430569&#39;, &#39;5475&#39;, &#39;7932736&#39;, &#39;1401476&#39;, &#39;5471&#39;, &#39;28801690&#39;, &#39;25767346&#39;, &#39;20563811&#39;, &#39;13540149&#39;, &#39;9856721&#39;, &#39;18688016&#39;, &#39;16300093&#39;, &#39;6419743&#39;, &#39;28930862&#39;, &#39;22747441&#39;, &#39;5470&#39;, &#39;27178169&#39;, &#39;16180175&#39;, &#39;6696985&#39;, &#39;21540995&#39;, &#39;17839087&#39;, &#39;12657479&#39;, &#39;21560020&#39;, &#39;25426791&#39;, &#39;1471425&#39;, &#39;8683527&#39;, &#39;11262855&#39;, &#39;107497&#39;, &#39;9831947&#39;, &#39;18713720&#39;, &#39;33876518&#39;, &#39;18949467&#39;, &#39;22918384&#39;, &#39;6668046&#39;, &#39;35711865&#39;, &#39;25038707&#39;, &#39;29055777&#39;, &#39;19383583&#39;, &#39;7202990&#39;, &#39;17282465&#39;, &#39;14595296&#39;, &#39;17317768&#39;, &#39;28191772&#39;, &#39;19254270&#39;, &#39;1162898&#39;, &#39;23802330&#39;, &#39;28670400&#39;, &#39;17797233&#39;, &#39;17789078&#39;, &#39;13623558&#39;, &#39;17982595&#39;, &#39;26514633&#39;, &#39;7432752&#39;, &#39;35596721&#39;, &#39;3296450&#39;, &#39;9670791&#39;, &#39;1167752&#39;, &#39;7107665&#39;, &#39;26845374&#39;, &#39;36226992&#39;, &#39;7877620&#39;, &#39;16847978&#39;, &#39;18689113&#39;, &#39;17345357&#39;, &#39;24024309&#39;, &#39;32854695&#39;, &#39;20873522&#39;, &#39;12935613&#39;, &#39;11502420&#39;, &#39;22469599&#39;, &#39;25753230&#39;, &#39;13625800&#39;, &#39;16287485&#39;, &#39;26085996&#39;, &#39;18461014&#39;, &#39;20894754&#39;, &#39;15774971&#39;, &#39;28094773&#39;, &#39;18416234&#39;, &#39;13641954&#39;, &#39;25372528&#39;, &#39;21522382&#39;, &#39;2262747&#39;, &#39;10296957&#39;, &#39;22565648&#39;, &#39;28960475&#39;, &#39;9969571&#39;, &#39;970917&#39;, &#39;18667069&#39;, &#39;13614350&#39;, &#39;23698704&#39;, &#39;13561202&#39;, &#39;7005741&#39;, &#39;16044564&#39;, &#39;23695850&#39;, &#39;6201586&#39;, &#39;256683&#39;, &#39;17253765&#39;, &#39;11272641&#39;, &#39;1558486&#39;, &#39;925412&#39;, &#39;23223667&#39;, &#39;22059026&#39;, &#39;18710190&#39;, &#39;13424701&#39;, &#39;24112181&#39;, &#39;22105022&#39;, &#39;13602666&#39;, &#39;7782572&#39;, &#39;848655&#39;, &#39;18158464&#39;, &#39;13558128&#39;, &#39;17406183&#39;, &#39;24252929&#39;, &#39;11367926&#39;, &#39;2187995&#39;, &#39;17305435&#39;, &#39;20318659&#39;, &#39;19478439&#39;, &#39;18617752&#39;, &#39;26243089&#39;, &#39;22820624&#39;, &#39;22612307&#39;, &#39;25048937&#39;, &#39;17380078&#39;, &#39;18070037&#39;, &#39;25351314&#39;, &#39;6214263&#39;, &#39;18923851&#39;, &#39;17056572&#39;, &#39;6682611&#39;, &#39;17855823&#39;, &#39;7877609&#39;, &#39;6988836&#39;, &#39;9860176&#39;, &#39;30272403&#39;, &#39;6287607&#39;, &#39;13446802&#39;, &#39;25989499&#39;, &#39;28927632&#39;, &#39;16082380&#39;, &#39;1792183&#39;, &#39;29090191&#39;, &#39;15704186&#39;, &#39;31342081&#39;, &#39;20362341&#39;, &#39;21848807&#39;, &#39;21544013&#39;, &#39;32196100&#39;, &#39;12512617&#39;, &#39;18085454&#39;, &#39;25477553&#39;, &#39;17285979&#39;, &#39;23607406&#39;, &#39;23586798&#39;, &#39;15784168&#39;, &#39;35610130&#39;, &#39;18277351&#39;, &#39;10234834&#39;, &#39;18740106&#39;, &#39;32787035&#39;, &#39;22057878&#39;, &#39;22374550&#39;, &#39;25032511&#39;, &#39;13131651&#39;, &#39;26462167&#39;, &#39;28364349&#39;, &#39;27865405&#39;, &#39;28116173&#39;, &#39;12370908&#39;, &#39;12379979&#39;, &#39;23364977&#39;, &#39;13562614&#39;, &#39;26162946&#39;, &#39;26401901&#39;, &#39;32469600&#39;, &#39;6484809&#39;, &#39;15827051&#39;, &#39;18517479&#39;, &#39;16386616&#39;, &#39;30235395&#39;, &#39;35291237&#39;, &#39;17879118&#39;, &#39;22518395&#39;, &#39;20799951&#39;, &#39;23306917&#39;, &#39;13087683&#39;, &#39;16638435&#39;, &#39;33013778&#39;, &#39;32705495&#39;, &#39;18750002&#39;, &#39;32327896&#39;, &#39;20815159&#39;, &#39;13611052&#39;, &#39;20958895&#39;, &#39;26865481&#39;, &#39;12535267&#39;, &#39;15845588&#39;, &#39;20346560&#39;, &#39;19140487&#39;, &#39;20885669&#39;, &#39;11465793&#39;, &#39;16110229&#39;, &#39;18367755&#39;, &#39;16431267&#39;, &#39;893131&#39;, &#39;25002842&#39;, &#39;26328452&#39;, &#39;3086961&#39;, &#39;17999114&#39;, &#39;22820646&#39;, &#39;35267531&#39;, &#39;26876834&#39;, &#39;27068801&#39;, &#39;13556970&#39;, &#39;32596639&#39;, &#39;23902261&#39;, &#39;20747215&#39;, &#39;296843&#39;, &#39;27839326&#39;, &#39;17905376&#39;, &#39;35561948&#39;, &#39;9335682&#39;, &#39;455592&#39;, &#39;23122150&#39;, &#39;13646978&#39;, &#39;32672169&#39;, &#39;5999961&#39;, &#39;18711392&#39;, &#39;295898&#39;, &#39;20876955&#39;, &#39;18400305&#39;, &#39;20651067&#39;, &#39;21798664&#39;, &#39;6017885&#39;, &#39;22209071&#39;, &#39;20826236&#39;, &#39;11476408&#39;, &#39;18710654&#39;, &#39;17244064&#39;, &#39;10616360&#39;, &#39;33812720&#39;, &#39;36217912&#39;, &#39;12497752&#39;, &#39;12626302&#39;, &#39;18738787&#39;, &#39;23592434&#39;, &#39;15719753&#39;, &#39;23007086&#39;, &#39;33791193&#39;, &#39;21569815&#39;, &#39;22569433&#39;, &#39;171813&#39;, &#39;13570308&#39;, &#39;22247199&#39;, &#39;6369436&#39;, &#39;17902413&#39;, &#39;16234117&#39;, &#39;23245346&#39;, &#39;18217608&#39;, &#39;29546094&#39;, &#39;18917661&#39;, &#39;15771057&#39;, &#39;13621880&#39;, &#39;12643928&#39;, &#39;22008638&#39;, &#39;15736528&#39;, &#39;25730991&#39;, &#39;1175481&#39;, &#39;22820703&#39;, &#39;33818894&#39;, &#39;18465782&#39;, &#39;77523&#39;, &#39;10754989&#39;, &#39;5477&#39;, &#39;4479640&#39;, &#39;18274994&#39;, &#39;10430432&#39;, &#39;18710464&#39;, &#39;1781701&#39;, &#39;18046319&#39;, &#39;7107296&#39;, &#39;17789454&#39;, &#39;25862866&#39;, &#39;25578651&#39;, &#39;35624010&#39;, &#39;6490389&#39;, &#39;29942695&#39;, &#39;17182084&#39;, &#39;13562963&#39;, &#39;12066190&#39;, &#39;13184882&#39;, &#39;25478508&#39;, &#39;12492298&#39;, &#39;22451087&#39;, &#39;30308795&#39;, &#39;25952311&#39;, &#39;18722749&#39;, &#39;16025268&#39;, &#39;25345762&#39;, &#39;16018364&#39;, &#39;30812729&#39;, &#39;19358657&#39;, &#39;15743060&#39;, &#39;24503488&#39;, &#39;18248500&#39;, &#39;12280320&#39;, &#39;2938728&#39;, &#39;8040193&#39;, &#39;25851222&#39;, &#39;6606279&#39;, &#39;13425323&#39;, &#39;23463187&#39;, &#39;26840292&#39;, &#39;22590639&#39;, &#39;26826098&#39;, &#39;1611724&#39;, &#39;1359366&#39;, &#39;23003589&#39;, &#39;32672170&#39;, &#39;16038170&#39;, &#39;7776692&#39;, &#39;17934350&#39;, &#39;15114365&#39;, &#39;8667747&#39;, &#39;13517330&#39;, &#39;18500423&#39;, &#39;16043861&#39;, &#39;15770294&#39;, &#39;23392951&#39;, &#39;21800933&#39;, &#39;15869972&#39;, &#39;18618963&#39;, &#39;25220067&#39;, &#39;23667081&#39;, &#39;16106928&#39;, &#39;17802732&#39;, &#39;9761397&#39;, &#39;6064259&#39;, &#39;31700393&#39;, &#39;13159888&#39;, &#39;23478203&#39;, &#39;31304766&#39;, &#39;29983806&#39;, &#39;25806040&#39;, &#39;6772333&#39;, &#39;12408058&#39;, &#39;29245055&#39;, &#39;25095072&#39;, &#39;22301044&#39;, &#39;23213324&#39;, &#39;13489404&#39;, &#39;2239941&#39;, &#39;15755597&#39;, &#39;25402233&#39;, &#39;18667071&#39;, &#39;3883919&#39;, &#39;1039462&#39;, &#39;33655993&#39;, &#39;17905623&#39;, &#39;32306675&#39;, &#39;25580994&#39;, &#39;25878460&#39;, &#39;41865&#39;, &#39;27421523&#39;, &#39;22397261&#39;, &#39;16118339&#39;, &#39;9480062&#39;, &#39;949562&#39;, &#39;872666&#39;, &#39;11316396&#39;, &#39;21825308&#39;, &#39;22946401&#39;, &#39;22914379&#39;, &#39;17268167&#39;, &#39;23264557&#39;, &#39;13627059&#39;, &#39;11333587&#39;, &#39;15991856&#39;, &#39;11736539&#39;, &#39;5527857&#39;, &#39;30507892&#39;, &#39;17951429&#39;, &#39;18298900&#39;, &#39;13372855&#39;, &#39;7937116&#39;, &#39;20803587&#39;, &#39;17319298&#39;, &#39;6721985&#39;, &#39;13609836&#39;, &#39;2617468&#39;, &#39;18750632&#39;, &#39;12042324&#39;, &#39;2747979&#39;, &#39;25538495&#39;, &#39;6772387&#39;, &#39;30631952&#39;, &#39;8797737&#39;, &#39;15852552&#39;, &#39;21415819&#39;, &#39;23396332&#39;, &#39;15830744&#39;, &#39;20763122&#39;, &#39;6013089&#39;, &#39;7303448&#39;, &#39;9226958&#39;, &#39;12861705&#39;, &#39;23677696&#39;, &#39;27804437&#39;, &#39;23431006&#39;, &#39;34466147&#39;, &#39;24629547&#39;, &#39;47000&#39;, &#39;17315048&#39;, &#39;16142085&#39;, &#39;13519470&#39;, &#39;25491310&#39;, &#39;32327029&#39;, &#39;16221771&#39;, &#39;14759663&#39;, &#39;31125943&#39;, &#39;21899768&#39;, &#39;30963868&#39;, &#39;25905906&#39;, &#39;18804646&#39;, &#39;25303122&#39;, &#39;29995403&#39;, &#39;30290686&#39;, &#39;32172002&#39;, &#39;23148432&#39;, &#39;18685229&#39;, &#39;26244621&#39;, &#39;31686251&#39;, &#39;17678435&#39;, &#39;25270785&#39;, &#39;19240738&#39;, &#39;23499218&#39;, &#39;23011238&#39;, &#39;14424887&#39;, &#39;13573833&#39;, &#39;21838140&#39;, &#39;6460568&#39;, &#39;22733227&#39;, &#39;19019010&#39;, &#39;26344382&#39;, &#39;22028282&#39;, &#39;6535792&#39;, &#39;13035203&#39;, &#39;11296680&#39;, &#39;16136188&#39;, &#39;21895490&#39;, &#39;18071590&#39;, &#39;25414128&#39;, &#39;24947668&#39;, &#39;30639879&#39;, &#39;24060213&#39;, &#39;32190294&#39;, &#39;32196024&#39;, &#39;18505857&#39;, &#39;25402339&#39;, &#39;8267080&#39;, &#39;10428902&#39;, &#39;21825994&#39;, &#39;16094784&#39;, &#39;8430187&#39;, &#39;15298019&#39;, &#39;22886522&#39;, &#39;25841708&#39;, &#39;6820997&#39;, &#39;25086476&#39;, &#39;13335038&#39;, &#39;28593492&#39;, &#39;23231754&#39;, &#39;31302742&#39;, &#39;26699682&#39;, &#39;18333278&#39;, &#39;14069099&#39;, &#39;23752009&#39;, &#39;35427227&#39;, &#39;10319865&#39;, &#39;11471507&#39;, &#39;8891899&#39;, &#39;16163526&#39;, &#39;12656079&#39;, &#39;31938415&#39;, &#39;23944267&#39;, &#39;25739188&#39;, &#39;19564919&#39;, &#39;893136&#39;, &#39;13578037&#39;, &#39;26815023&#39;, &#39;27251284&#39;, &#39;13643473&#39;, &#39;22026125&#39;, &#39;17807489&#39;, &#39;20549381&#39;, &#39;18926988&#39;, &#39;19304768&#39;, &#39;6249519&#39;, &#39;33959060&#39;, &#39;25676931&#39;, &#39;16103612&#39;, &#39;11718435&#39;, &#39;25153867&#39;, &#39;21081683&#39;, &#39;25563463&#39;, &#39;19030181&#39;, &#39;32721509&#39;, &#39;11831028&#39;, &#39;36383978&#39;, &#39;4591352&#39;, &#39;25532945&#39;, &#39;10435027&#39;, &#39;15784893&#39;, &#39;30302897&#39;, &#39;22173562&#39;, &#39;816816&#39;, &#39;7955579&#39;, &#39;31681856&#39;, &#39;15833672&#39;, &#39;34391120&#39;, &#39;3362689&#39;, &#39;16025398&#39;, &#39;24885537&#39;, &#39;12835105&#39;, &#39;18667072&#39;, &#39;26067879&#39;, &#39;29216063&#39;, &#39;1781707&#39;, &#39;18193741&#39;, &#39;15779138&#39;, &#39;21926693&#39;, &#39;13565922&#39;, &#39;24581473&#39;, &#39;28572585&#39;, &#39;32800617&#39;, &#39;17232449&#39;, &#39;25782357&#39;, &#39;30798481&#39;, &#39;18755030&#39;, &#39;12328746&#39;, &#39;27067314&#39;, &#39;17970732&#39;, &#39;23251775&#39;, &#39;28963439&#39;, &#39;23969542&#39;, &#39;15860371&#39;, &#39;15792385&#39;, &#39;30268316&#39;, &#39;17928172&#39;, &#39;296839&#39;, &#39;23241465&#39;, &#39;24742536&#39;, &#39;12600138&#39;, &#39;2140907&#39;, &#39;25185586&#39;, &#39;17185524&#39;, &#39;17563287&#39;, &#39;7062423&#39;, &#39;23565121&#39;, &#39;24737104&#39;, &#39;28255378&#39;, &#39;26050627&#39;, &#39;8419315&#39;, &#39;34863649&#39;, &#39;7285601&#39;, &#39;27835858&#39;, &#39;17163051&#39;, &#39;4794161&#39;, &#39;20838734&#39;, &#39;15698354&#39;, &#39;8125982&#39;, &#39;6567260&#39;, &#39;22138225&#39;, &#39;25035808&#39;, &#39;30074903&#39;, &#39;17286849&#39;, &#39;15715013&#39;, &#39;1118668&#39;, &#39;18661631&#39;, &#39;8322565&#39;, &#39;16149483&#39;, &#39;11059672&#39;, &#39;11406968&#39;, &#39;23308562&#39;, &#39;20307239&#39;, &#39;22610291&#39;, &#39;33874143&#39;, &#39;14163319&#39;, &#39;68808&#39;, &#39;35651100&#39;, &#39;13068184&#39;, &#39;11780869&#39;, &#39;22391027&#39;, &#39;16532513&#39;, &#39;23729961&#39;, &#39;16048509&#39;, &#39;10771500&#39;, &#39;29453740&#39;, &#39;29066539&#39;, &#39;26068758&#39;, &#39;9884613&#39;, &#39;17976538&#39;, &#39;17321852&#39;, &#39;20321004&#39;, &#39;13492054&#39;, &#39;23395098&#39;, &#39;10197660&#39;, &#39;22557272&#39;, &#39;762743&#39;, &#39;30909770&#39;, &#39;31362625&#39;, &#39;14742263&#39;, &#39;9378347&#39;, &#39;5043803&#39;, &#39;3279999&#39;, &#39;28963433&#39;, &#39;864&#39;, &#39;21798679&#39;, &#39;27865418&#39;, &#39;16176099&#39;, &#39;20737476&#39;, &#39;20493675&#39;, &#39;15829776&#39;, &#39;13502270&#39;, &#39;31076720&#39;, &#39;8684868&#39;, &#39;47535&#39;, &#39;134502&#39;, &#39;19174917&#39;, &#39;29476176&#39;, &#39;6601779&#39;, &#39;17372301&#39;, &#39;20486826&#39;, &#39;28441377&#39;, &#39;26136747&#39;, &#39;23681652&#39;, &#39;12267806&#39;, &#39;15827609&#39;, &#39;16217859&#39;, &#39;12352354&#39;, &#39;26133133&#39;, &#39;17162156&#39;, &#39;25313807&#39;, &#39;34005800&#39;, &#39;11106711&#39;, &#39;22820681&#39;, &#39;25559177&#39;, &#39;25871053&#39;, &#39;34303350&#39;, &#39;2430904&#39;, &#39;2383357&#39;, &#39;16121916&#39;, &#39;3652228&#39;, &#39;25467816&#39;, &#39;29058155&#39;, &#39;17670022&#39;, &#39;17372039&#39;, &#39;24235658&#39;, &#39;22013246&#39;, &#39;35277259&#39;, &#39;29452280&#39;, &#39;8696793&#39;, &#39;26150280&#39;, &#39;27245104&#39;, &#39;15743069&#39;, &#39;24992096&#39;, &#39;11295686&#39;, &#39;3544003&#39;, &#39;17744501&#39;, &#39;27457744&#39;, &#39;12250584&#39;, &#39;25867602&#39;, &#39;15782527&#39;, &#39;31928508&#39;, &#39;6530628&#39;, &#39;7592539&#39;, &#39;6012312&#39;, &#39;6404106&#39;, &#39;862268&#39;, &#39;25409006&#39;, &#39;25068655&#39;, &#39;22371139&#39;, &#39;31247145&#39;, &#39;6885125&#39;, &#39;5983062&#39;, &#39;25465121&#39;, &#39;13512568&#39;, &#39;18491244&#39;, &#39;31930223&#39;, &#39;6645647&#39;, &#39;13585687&#39;, &#39;13603056&#39;, &#39;1907905&#39;, &#39;28813854&#39;, &#39;31416507&#39;, &#39;8608219&#39;, &#39;8442457&#39;, &#39;34479625&#39;, &#39;20876176&#39;, &#39;1118028&#39;, &#39;15982675&#39;, &#39;20661290&#39;, &#39;16153415&#39;, &#39;27865302&#39;, &#39;24865428&#39;, &#39;18747814&#39;, &#39;16120785&#39;, &#39;13564669&#39;, &#39;17383543&#39;, &#39;20930777&#39;, &#39;15706076&#39;, &#39;15704169&#39;, &#39;1163304&#39;, &#39;16221043&#39;, &#39;13189115&#39;, &#39;20527042&#39;, &#39;18413677&#39;, &#39;34168383&#39;, &#39;25922545&#39;, &#39;13572785&#39;, &#39;17740067&#39;, &#39;21480931&#39;, &#39;202588&#39;, &#39;28280014&#39;, &#39;18158779&#39;, &#39;15783857&#39;, &#39;6309556&#39;, &#39;30253546&#39;, &#39;4468230&#39;, &#39;4079980&#39;, &#39;29976154&#39;, &#39;6945680&#39;, &#39;6277870&#39;, &#39;20776304&#39;, &#39;17835248&#39;, &#39;13631961&#39;, &#39;22098536&#39;, &#39;16309769&#39;, &#39;14762245&#39;, &#39;1743455&#39;, &#39;20959422&#39;, &#39;13366606&#39;, &#39;28422098&#39;, &#39;18960669&#39;, &#39;22443451&#39;, &#39;4582108&#39;, &#39;6662198&#39;, &#39;34364064&#39;, &#39;21443484&#39;, &#39;858352&#39;, &#39;22396149&#39;, &#39;23509049&#39;, &#39;13572331&#39;, &#39;23055327&#39;, &#39;17926316&#39;, &#39;9286283&#39;, &#39;3243910&#39;, &#39;24712933&#39;, &#39;6454654&#39;, &#39;29348347&#39;, &#39;6753193&#39;, &#39;17280301&#39;, &#39;26716806&#39;, &#39;23362138&#39;, &#39;16023652&#39;, &#39;2655&#39;, &#39;1885731&#39;, &#39;6214264&#39;, &#39;28486119&#39;, &#39;2728868&#39;, &#39;11366370&#39;, &#39;28251513&#39;, &#39;10151606&#39;, &#39;22025049&#39;, &#39;9797134&#39;, &#39;20487641&#39;, &#39;11382943&#39;, &#39;22886190&#39;, &#39;12773641&#39;, &#39;18038996&#39;, &#39;7641032&#39;, &#39;8175796&#39;, &#39;16038894&#39;, &#39;24585399&#39;, &#39;25454820&#39;, &#39;7949442&#39;, &#39;25418711&#39;, &#39;15704174&#39;, &#39;18310712&#39;, &#39;18872581&#39;, &#39;30992603&#39;, &#39;28226184&#39;, &#39;10382704&#39;, &#39;10489305&#39;, &#39;23129688&#39;, &#39;23510841&#39;, &#39;3001581&#39;, &#39;22736932&#39;, &#39;22141666&#39;, &#39;15923121&#39;, &#39;12158002&#39;, &#39;18402178&#39;, &#39;17159918&#39;, &#39;17855196&#39;, &#39;5970445&#39;, &#39;14796360&#39;, &#39;23343051&#39;, &#39;6788879&#39;, &#39;7745385&#39;, &#39;26014657&#39;, &#39;16207383&#39;, &#39;18336048&#39;, &#39;24213573&#39;, &#39;16084645&#39;, &#39;10616322&#39;, &#39;11291921&#39;, &#39;26133825&#39;, &#39;13279499&#39;, &#39;2711522&#39;, &#39;16691284&#39;, &#39;27758324&#39;, &#39;832130&#39;, &#39;32501454&#39;, &#39;24844880&#39;, &#39;17694651&#39;, &#39;2437444&#39;, &#39;30814938&#39;, &#39;9523411&#39;, &#39;1812673&#39;, &#39;17312364&#39;, &#39;20936040&#39;, &#39;15738816&#39;, &#39;22529254&#39;, &#39;6941985&#39;, &#39;20301447&#39;, &#39;13067277&#39;, &#39;11472275&#39;, &#39;27833446&#39;, &#39;621714&#39;, &#39;23055326&#39;, &#39;19024389&#39;, &#39;6308402&#39;, &#39;412765&#39;, &#39;6365868&#39;, &#39;21606929&#39;, &#39;18810809&#39;, &#39;28002909&#39;, &#39;17622641&#39;, &#39;30733881&#39;, &#39;16059263&#39;, &#39;24936823&#39;, &#39;15782628&#39;, &#39;7303447&#39;, &#39;11366921&#39;, &#39;25458088&#39;, &#39;21526588&#39;, &#39;30819387&#39;, &#39;21523103&#39;, &#39;15834381&#39;, &#39;17253961&#39;, &#39;19191388&#39;, &#39;16136701&#39;, &#39;10860047&#39;, &#39;15795357&#39;, &#39;13450992&#39;, &#39;7818697&#39;, &#39;23488177&#39;, &#39;13266989&#39;, &#39;32327894&#39;, &#39;23290223&#39;, &#39;13637131&#39;, &#39;2311681&#39;, &#39;23481110&#39;, &#39;32452232&#39;, &#39;17374967&#39;, &#39;23377235&#39;, &#39;25149009&#39;, &#39;17268736&#39;, &#39;3234963&#39;, &#39;18075570&#39;, &#39;9025186&#39;, &#39;35841506&#39;, &#39;25739181&#39;, &#39;11295839&#39;, &#39;6277597&#39;, &#39;32571475&#39;, &#39;6795650&#39;, &#39;21803253&#39;, &#39;29557229&#39;, &#39;17698624&#39;, &#39;6540523&#39;, &#39;18303228&#39;, &#39;18330586&#39;, &#39;32187706&#39;, &#39;17701696&#39;, &#39;31574524&#39;, &#39;295895&#39;, &#39;13644251&#39;, &#39;30190890&#39;, &#39;27432466&#39;, &#39;32601138&#39;, &#39;18710455&#39;, &#39;22098740&#39;, &#39;22443454&#39;, &#39;13640224&#39;, &#39;17792118&#39;, &#39;7107655&#39;, &#39;27192797&#39;, &#39;22027303&#39;, &#39;13572091&#39;, &#39;18240444&#39;, &#39;18808404&#39;, &#39;7538739&#39;, &#39;1039461&#39;, &#39;13509182&#39;, &#39;14287920&#39;, &#39;16410928&#39;, &#39;17458508&#39;, &#39;17207560&#39;, &#39;6319350&#39;, &#39;15765784&#39;, &#39;16080569&#39;, &#39;4544759&#39;, &#39;30194474&#39;, &#39;18592700&#39;, &#39;10407121&#39;, &#39;11542687&#39;, &#39;25925012&#39;, &#39;25115981&#39;, &#39;11306050&#39;, &#39;33957050&#39;, &#39;28239572&#39;, &#39;22880450&#39;, &#39;29240385&#39;, &#39;2798098&#39;, &#39;3708951&#39;, &#39;28550078&#39;, &#39;25719729&#39;, &#39;11387490&#39;, &#39;15738309&#39;, &#39;23003119&#39;, &#39;30073478&#39;, &#39;25552609&#39;, &#39;16368772&#39;, &#39;25750833&#39;, &#39;27240909&#39;, &#39;1200110&#39;, &#39;22901602&#39;, &#39;33970415&#39;, &#39;25907194&#39;, &#39;30736096&#39;, &#39;16031628&#39;, &#39;13646586&#39;, &#39;20910326&#39;, &#39;13577338&#39;, &#39;25817368&#39;, &#39;31616479&#39;, &#39;19005845&#39;, &#39;32493379&#39;, &#39;28396808&#39;, &#39;493092&#39;, &#39;6848433&#39;, &#39;16163548&#39;, &#39;9996853&#39;, &#39;13417027&#39;, &#39;23298852&#39;, &#39;24733515&#39;, &#39;17368146&#39;, &#39;11521684&#39;, &#39;988811&#39;, &#39;26097476&#39;, &#39;13364111&#39;, &#39;23396344&#39;, &#39;32310213&#39;, &#39;23012014&#39;, &#39;15779955&#39;, &#39;19501104&#39;, &#39;18407011&#39;, &#39;23264599&#39;, &#39;10327361&#39;, &#39;25979514&#39;, &#39;25380799&#39;, &#39;15710432&#39;, &#39;7599408&#39;, &#39;12494832&#39;, &#39;18277434&#39;, &#39;23398687&#39;, &#39;171796&#39;, &#39;1430336&#39;, &#39;30537071&#39;, &#39;22667278&#39;, &#39;13613910&#39;, &#39;24844873&#39;, &#39;6338979&#39;, &#39;10307295&#39;, &#39;16123468&#39;, &#39;20822585&#39;, &#39;27951429&#39;, &#39;12061729&#39;, &#39;18163440&#39;, &#39;15839201&#39;, &#39;26847251&#39;, &#39;18364652&#39;, &#39;32574083&#39;, &#39;16240747&#39;, &#39;29056090&#39;, &#39;26104159&#39;, &#39;18374073&#39;, &#39;7619312&#39;, &#39;16108278&#39;, &#39;20691208&#39;, &#39;13563204&#39;, &#39;15820139&#39;, &#39;296829&#39;, &#39;18136444&#39;, &#39;13233432&#39;, &#39;27073501&#39;, &#39;27222447&#39;, &#39;3292087&#39;, &#39;31361778&#39;, &#39;35066575&#39;, &#39;1359361&#39;, &#39;32348285&#39;, &#39;17233649&#39;, &#39;10180184&#39;, &#39;15853000&#39;, &#39;22011300&#39;, &#39;23245330&#39;, &#39;16074780&#39;, &#39;21458175&#39;, &#39;26256536&#39;, &#39;12606483&#39;, &#39;15834248&#39;, &#39;8423493&#39;, &#39;13558130&#39;, &#39;18599593&#39;, &#39;25648152&#39;, &#39;7882466&#39;, &#39;31142477&#39;, &#39;10400074&#39;, &#39;17928697&#39;, &#39;22397401&#39;, &#39;19866705&#39;, &#39;3283211&#39;, &#39;25238369&#39;, &#39;6456478&#39;, &#39;49813&#39;, &#39;9156663&#39;, &#39;142293&#39;, &#39;18331088&#39;, &#39;25470866&#39;, &#39;19248302&#39;, &#39;20446243&#39;, &#39;492000&#39;, &#39;11870085&#39;, &#39;13502941&#39;, &#39;1167711&#39;, &#39;14769440&#39;, &#39;19572096&#39;, &#39;10684183&#39;, &#39;5514914&#39;, &#39;35525846&#39;, &#39;25817366&#39;, &#39;28415052&#39;, &#39;18590221&#39;, &#39;16624883&#39;, &#39;13608379&#39;, &#39;18373805&#39;, &#39;11072325&#39;, &#39;1167758&#39;, &#39;15784593&#39;, &#39;13369984&#39;, &#39;28869162&#39;, &#39;20821105&#39;, &#39;70750&#39;, &#39;22026914&#39;, &#39;23251163&#39;, &#39;19465062&#39;, &#39;25859959&#39;, &#39;11340157&#39;, &#39;25907431&#39;, &#39;35427560&#39;, &#39;26204799&#39;, &#39;24598365&#39;, &#39;25573037&#39;, &#39;18332192&#39;, &#39;8256471&#39;, &#39;12985366&#39;, &#39;7775689&#39;, &#39;16122644&#39;, &#39;17903642&#39;, &#39;24338230&#39;, &#39;16094352&#39;, &#39;17156273&#39;, &#39;6467118&#39;, &#39;23597316&#39;, &#39;1324062&#39;, &#39;20746310&#39;, &#39;28525303&#39;, &#39;32729810&#39;, &#39;34572308&#39;, &#39;12943330&#39;, &#39;16141742&#39;, &#39;31453333&#39;, &#39;32912399&#39;, &#39;17200915&#39;, &#39;26372386&#39;, &#39;1033918&#39;, &#39;22012199&#39;, &#39;17858541&#39;, &#39;6453849&#39;, &#39;13147906&#39;, &#39;2166416&#39;, &#39;21845565&#39;, &#39;18079910&#39;, &#39;9947735&#39;, &#39;47522&#39;, &#39;3228468&#39;, &#39;1508371&#39;, &#39;24169712&#39;, &#39;27863078&#39;, &#39;25195069&#39;, &#39;25707413&#39;, &#39;4031861&#39;, &#39;20555341&#39;, &#39;7862090&#39;, &#39;25645289&#39;, &#39;21840310&#39;, &#39;24763181&#39;, &#39;28183257&#39;, &#39;23506567&#39;, &#39;7265901&#39;, &#39;20534719&#39;, &#39;23666179&#39;, &#39;21280885&#39;, &#39;17857648&#39;, &#39;3&#39;, &#39;17735871&#39;, &#39;12997113&#39;, &#39;1248077&#39;, &#39;12973964&#39;, &#39;18331796&#39;, &#39;26309684&#39;, &#39;31352119&#39;, &#39;25929273&#39;, &#39;22914373&#39;, &#39;22841994&#39;, &#39;12187799&#39;, &#39;22558796&#39;, &#39;11085074&#39;, &#39;26143397&#39;, &#39;21941928&#39;, &#39;25748701&#39;, &#39;18870649&#39;, &#39;25573742&#39;, &#39;24615234&#39;, &#39;18765860&#39;, &#39;10255274&#39;, &#39;13455462&#39;, &#39;30627196&#39;, &#39;28479611&#39;, &#39;7428537&#39;, &#39;2264102&#39;, &#39;28052767&#39;, &#39;19035585&#39;, &#39;16068905&#39;, &#39;24245069&#39;, &#39;7683425&#39;, &#39;14760741&#39;, &#39;22014037&#39;, &#39;1611537&#39;, &#39;26166591&#39;, &#39;27775414&#39;, &#39;22012779&#39;, &#39;18461597&#39;, &#39;22069364&#39;, &#39;11304270&#39;, &#39;21877015&#39;, &#39;29067264&#39;, &#39;22232135&#39;, &#39;18240575&#39;, &#39;7902652&#39;, &#39;1826649&#39;, &#39;33005686&#39;, &#39;11249180&#39;, &#39;4786064&#39;, &#39;12510082&#39;, &#39;25021837&#39;, &#39;6371614&#39;, &#39;23453787&#39;, &#39;12941351&#39;, &#39;12813562&#39;, &#39;13452130&#39;, &#39;22048373&#39;, &#39;30968446&#39;, &#39;16172579&#39;, &#39;23290384&#39;, &#39;9577857&#39;, &#39;13450839&#39;, &#39;18082943&#39;, &#39;28147904&#39;, &#39;7723926&#39;, &#39;17378967&#39;, &#39;19496550&#39;, &#39;25402286&#39;, &#39;18665794&#39;, &#39;30258297&#39;, &#39;9402421&#39;, &#39;2681117&#39;, &#39;11389422&#39;, &#39;8113493&#39;, &#39;20614474&#39;, &#39;20861464&#39;, &#39;26072029&#39;, &#39;25655480&#39;, &#39;20319534&#39;, &#39;14762489&#39;, &#39;20945198&#39;, &#39;1907452&#39;, &#39;975442&#39;, &#39;27042066&#39;, &#39;2661&#39;, &#39;17252078&#39;, &#39;23392759&#39;, &#39;20775702&#39;, &#39;35711177&#39;, &#39;15995451&#39;, &#39;13043622&#39;, &#39;33249543&#39;, &#39;13490003&#39;, &#39;36172798&#39;, &#39;615203&#39;, &#39;22022075&#39;, &#39;6658717&#39;, &#39;21825598&#39;, &#39;16050285&#39;, &#39;13541093&#39;, &#39;17617613&#39;, &#39;17118898&#39;, &#39;12139510&#39;, &#39;16026746&#39;, &#39;26632196&#39;, &#39;16282204&#39;, &#39;7541858&#39;, &#39;651603&#39;, &#39;6313338&#39;, &#39;13099951&#39;, &#39;26154394&#39;, &#39;26055229&#39;, &#39;30169721&#39;, &#39;33133924&#39;, &#39;23349454&#39;, &#39;2193922&#39;, &#39;1035885&#39;, &#39;21008563&#39;, &#39;9885717&#39;, &#39;11477648&#39;, &#39;3162139&#39;, &#39;17347634&#39;, &#39;33597793&#39;, &#39;25445626&#39;, &#39;17226872&#39;, &#39;28959274&#39;, &#39;12915074&#39;, &#39;24965453&#39;, &#39;28485265&#39;, &#39;28132722&#39;, &#39;25059351&#39;, &#39;13074276&#39;, &#39;9662788&#39;, &#39;6275962&#39;, &#39;17618692&#39;, &#39;25537895&#39;, &#39;15749148&#39;, &#39;13584041&#39;, &#39;7769080&#39;, &#39;9745301&#39;, &#39;24129434&#39;, &#39;23261348&#39;, &#39;51762&#39;, &#39;25536116&#39;, &#39;19245512&#39;, &#39;22591099&#39;, &#39;15327848&#39;, &#39;21394255&#39;, &#39;3162133&#39;, &#39;18761327&#39;, &#39;29972929&#39;, &#39;17233160&#39;, &#39;18045177&#39;, &#39;24416368&#39;, &#39;17372830&#39;, &#39;295897&#39;, &#39;18685593&#39;, &#39;16960820&#39;, &#39;24987978&#39;, &#39;13492029&#39;, &#39;33538809&#39;, &#39;17470676&#39;, &#39;25248885&#39;, &#39;30698397&#39;, &#39;848656&#39;, &#39;10370664&#39;, &#39;1629406&#39;, &#39;10323524&#39;, &#39;26124554&#39;, &#39;736301&#39;, &#39;29336777&#39;, &#39;31501375&#39;, &#39;86940&#39;, &#39;22369653&#39;, &#39;25742968&#39;, &#39;8242247&#39;, &#39;27774810&#39;, &#39;16041590&#39;, &#39;20698577&#39;, &#39;1168126&#39;, &#39;25153272&#39;, &#39;22009164&#39;, &#39;9576890&#39;, &#39;35628404&#39;, &#39;9782708&#39;, &#39;25799090&#39;, &#39;1482132&#39;, &#39;13641944&#39;, &#39;30625052&#39;, &#39;3475269&#39;, &#39;13190720&#39;, &#39;12029011&#39;, &#39;13020641&#39;, &#39;16636891&#39;, &#39;12328744&#39;, &#39;6999776&#39;, &#39;35604481&#39;, &#39;13484101&#39;, &#39;28863513&#39;, &#39;18705050&#39;, &#39;28371839&#39;, &#39;16118334&#39;, &#39;23633718&#39;, &#39;27272362&#39;, &#39;22614198&#39;, &#39;24845481&#39;, &#39;33832947&#39;, &#39;15750489&#39;, &#39;16071770&#39;, &#39;13064926&#39;, &#39;16003299&#39;, &#39;20565586&#39;, &#39;25519319&#39;, &#39;18513682&#39;, &#39;30312363&#39;, &#39;5478&#39;, &#39;20664548&#39;, &#39;27556033&#39;, &#39;13417580&#39;, &#39;24826119&#39;, &#39;35160402&#39;, &#39;18428110&#39;, &#39;25407919&#39;, &#39;25560245&#39;, &#39;7701058&#39;, &#39;1577365&#39;, &#39;13648024&#39;, &#39;34318133&#39;, &#39;9700012&#39;, &#39;7635541&#39;, &#39;22053825&#39;, &#39;28946401&#39;, &#39;6072428&#39;, &#39;14854809&#39;, &#39;13554008&#39;, &#39;30757322&#39;, &#39;18918647&#39;, &#39;13631515&#39;, &#39;34225260&#39;, &#39;27561654&#39;, &#39;13566014&#39;, &#39;296825&#39;, &#39;19241699&#39;, &#39;3356&#39;, &#39;18247775&#39;, &#39;14059087&#39;, &#39;6371188&#39;, &#39;30139651&#39;, &#39;10297811&#39;, &#39;3049950&#39;, &#39;15704161&#39;, &#39;22464636&#39;, &#39;25520880&#39;, &#39;22858373&#39;, &#39;2308980&#39;, &#39;17973762&#39;, &#39;6214262&#39;, &#39;26207857&#39;, &#39;13558932&#39;, &#39;24761879&#39;, &#39;12649718&#39;, &#39;23383694&#39;, &#39;23110080&#39;, &#39;20873735&#39;, &#39;4593339&#39;, &#39;19747310&#39;, &#39;18208828&#39;, &#39;8519739&#39;, &#39;22447268&#39;, &#39;26175968&#39;, &#39;19478858&#39;, &#39;25076674&#39;, &#39;23278585&#39;, &#39;33401915&#39;, &#39;22839547&#39;, &#39;988812&#39;, &#39;13037285&#39;, &#39;20650332&#39;, &#39;29192980&#39;, &#39;36226979&#39;, &#39;36186865&#39;, &#39;15798097&#39;, &#39;23390821&#39;, &#39;71001&#39;, &#39;22022744&#39;, &#39;7636830&#39;, &#39;12040504&#39;, &#39;15702765&#39;, &#39;30261139&#39;, &#39;30365843&#39;, &#39;10763617&#39;, &#39;3347826&#39;, &#39;13582806&#39;, &#39;17791941&#39;, &#39;11531822&#39;, &#39;10857048&#39;, &#39;31342863&#39;, &#39;2767052&#39;, &#39;23965011&#39;, &#39;19088744&#39;, &#39;17906724&#39;, &#39;25885299&#39;, &#39;3228285&#39;, &#39;18373282&#39;, &#39;17340867&#39;, &#39;13599993&#39;, &#39;15507958&#39;, &#39;22616546&#39;, &#39;23627224&#39;, &#39;24955138&#39;, &#39;13384167&#39;, &#39;22381143&#39;, &#39;45503&#39;, &#39;26869474&#39;, &#39;29434730&#39;, &#39;15757746&#39;, &#39;32150125&#39;, &#39;19307977&#39;, &#39;23392349&#39;, &#39;22443992&#39;, &#39;18713356&#39;, &#39;10623852&#39;, &#39;35957342&#39;, &#39;35963122&#39;, &#39;13410173&#39;, &#39;13722513&#39;, &#39;18697818&#39;, &#39;30177570&#39;, &#39;28462125&#39;, &#39;1238900&#39;, &#39;7415669&#39;, &#39;22845230&#39;, &#39;24548235&#39;, &#39;13484097&#39;, &#39;26228167&#39;, &#39;26542880&#39;, &#39;7636597&#39;, &#39;31437636&#39;, &#39;15717791&#39;, &#39;32113294&#39;, &#39;3529641&#39;, &#39;8874564&#39;, &#39;30625069&#39;, &#39;1587371&#39;, &#39;21798645&#39;, &#39;32881040&#39;, &#39;24517276&#39;, &#39;33561480&#39;, &#39;24845394&#39;, &#39;17238204&#39;, &#39;13543691&#39;, &#39;8409352&#39;, &#39;10955232&#39;, &#39;25293708&#39;, &#39;28449886&#39;, &#39;17917566&#39;, &#39;13319603&#39;, &#39;3882099&#39;, &#39;33397085&#39;, &#39;27262601&#39;, &#39;20446212&#39;, &#39;21464366&#39;, &#39;18159220&#39;, &#39;35185807&#39;, &#39;17697576&#39;, &#39;11763051&#39;, &#39;13556437&#39;, &#39;24068972&#39;, &#39;19532570&#39;, &#39;30892022&#39;, &#39;9501098&#39;, &#39;22915233&#39;, &#39;17230106&#39;, &#39;17190305&#39;, &#39;1990311&#39;, &#39;32876436&#39;, &#39;12649671&#39;, &#39;20896811&#39;, &#39;30304889&#39;, &#39;10029930&#39;, &#39;21496310&#39;, &#39;49771&#39;, &#39;21956204&#39;, &#39;27209601&#39;, &#39;6908529&#39;, &#39;25695197&#39;, &#39;26829551&#39;, &#39;27865646&#39;, &#39;13563020&#39;, &#39;34625531&#39;, &#39;13512949&#39;, &#39;20326033&#39;, &#39;18039636&#39;, &#39;26819816&#39;, &#39;1570814&#39;, &#39;32307783&#39;, &#39;25060416&#39;, &#39;32053652&#39;, &#39;13601883&#39;, &#39;13536858&#39;, &#39;6604736&#39;, &#39;23217267&#39;, &#39;10293381&#39;, &#39;29348016&#39;, &#39;28457773&#39;, &#39;17857128&#39;, &#39;13578028&#39;, &#39;19232069&#39;, &#39;26858928&#39;, &#39;21842632&#39;, &#39;2830061&#39;, &#39;9902321&#39;, &#39;23607381&#39;, &#39;29560766&#39;, &#39;5945479&#39;, &#39;13413859&#39;, &#39;9886587&#39;, &#39;25849641&#39;, &#39;30750943&#39;, &#39;31342728&#39;, &#39;26869421&#39;, &#39;23291340&#39;, &#39;30268317&#39;, &#39;28220755&#39;, &#39;10794976&#39;, &#39;30329629&#39;, &#39;24307863&#39;, &#39;9480077&#39;, &#39;13408579&#39;, &#39;30243012&#39;, &#39;26018476&#39;, &#39;25124132&#39;, &#39;29750146&#39;, &#39;25568667&#39;, &#39;22915525&#39;, &#39;12885533&#39;, &#39;19523475&#39;, &#39;18878756&#39;, &#39;18810188&#39;, &#39;12970552&#39;, &#39;3597767&#39;, &#39;18729913&#39;, &#39;25432891&#39;, &#39;13574246&#39;, &#39;17727547&#39;, &#39;22756742&#39;, &#39;3312730&#39;, &#39;1689096&#39;, &#39;13480671&#39;, &#39;8930594&#39;, &#39;17083703&#39;, &#39;11736454&#39;, &#39;32070902&#39;, &#39;30050074&#39;, &#39;8369717&#39;, &#39;19376702&#39;, &#39;13609263&#39;, &#39;1508373&#39;, &#39;23362134&#39;, &#39;25815945&#39;, &#39;23207076&#39;, &#39;16046182&#39;, &#39;20765998&#39;, &#39;18914023&#39;, &#39;3487145&#39;, &#39;27859636&#39;, &#39;25184100&#39;, &#39;10790543&#39;, &#39;32079434&#39;, &#39;24845176&#39;, &#39;6599441&#39;, &#39;45497&#39;, &#39;27224217&#39;, &#39;22753803&#39;, &#39;22565407&#39;, &#39;29352237&#39;, &#39;3399740&#39;, &#39;16410758&#39;, &#39;17673265&#39;, &#39;18277369&#39;, &#39;16281293&#39;, &#39;23164819&#39;, &#39;34878457&#39;, &#39;13562891&#39;, &#39;16052844&#39;, &#39;25471933&#39;, &#39;15840628&#39;, &#39;25170697&#39;, &#39;13537626&#39;, &#39;36235191&#39;, &#39;4666058&#39;, &#39;17998865&#39;, &#39;25034701&#39;, &#39;17383918&#39;, &#39;7769068&#39;, &#39;24500712&#39;, &#39;32862166&#39;, &#39;23596051&#39;, &#39;17240354&#39;, &#39;24911900&#39;, &#39;33249079&#39;, &#39;29976332&#39;, &#39;31693618&#39;, &#39;25688111&#39;, &#39;1772798&#39;, &#39;8679437&#39;, &#39;13032018&#39;, &#39;11235712&#39;, &#39;11735983&#39;, &#39;11450073&#39;, &#39;25202033&#39;, &#39;32714405&#39;, &#39;14856786&#39;, &#39;2660&#39;, &#39;19184431&#39;, &#39;26267528&#39;, &#39;15743073&#39;, &#39;15869901&#39;, &#39;87823&#39;, &#39;13444844&#39;, &#39;5971209&#39;, &#39;18522512&#39;, &#39;1050869&#39;, &#39;18590594&#39;, &#39;7338921&#39;, &#39;23304136&#39;, &#39;24143070&#39;, &#39;31177549&#39;, &#39;17907734&#39;, &#39;2888212&#39;, &#39;17289350&#39;, &#39;18041074&#39;, &#39;13563913&#39;, &#39;21416527&#39;, &#39;6219406&#39;, &#39;15738367&#39;, &#39;26190650&#39;, &#39;25792193&#39;, &#39;25142590&#39;, &#39;27872610&#39;, &#39;25617779&#39;, &#39;7328985&#39;, &#39;13598952&#39;, &#39;19548976&#39;, &#39;22882407&#39;, &#39;17798613&#39;, &#39;35666553&#39;, &#39;33985876&#39;, &#39;32716769&#39;, &#39;26869457&#39;, &#39;23399768&#39;, &#39;10201650&#39;, &#39;25069196&#39;, &#39;2195228&#39;, &#39;19542808&#39;, &#39;15947905&#39;, &#39;26219614&#39;, &#39;12390063&#39;, &#39;25555156&#39;, &#39;16049104&#39;, &#39;7260188&#39;, &#39;7315452&#39;, &#39;23112751&#39;, &#39;22754100&#39;, &#39;18398230&#39;, &#39;20868113&#39;, &#39;7693362&#39;, &#39;18950883&#39;, &#39;18139937&#39;, &#39;25587116&#39;, &#39;497318&#39;, &#39;15717897&#39;, &#39;2262746&#39;, &#39;1611839&#39;, &#39;23121026&#39;, &#39;6342509&#39;, &#39;23388229&#39;, &#39;18952334&#39;, &#39;2195230&#39;, &#39;22758737&#39;, &#39;18177642&#39;, &#39;8659282&#39;, &#39;20574633&#39;, &#39;22716410&#39;, &#39;6626071&#39;, &#39;21143500&#39;, &#39;13569253&#39;, &#39;21480930&#39;, &#39;10924618&#39;, &#39;19345703&#39;, &#39;17847583&#39;, &#39;32613491&#39;, &#39;23356642&#39;, &#39;6663401&#39;, &#39;30124071&#39;, &#39;25557821&#39;, &#39;21375409&#39;, &#39;25080929&#39;, &#39;24834780&#39;, &#39;5473&#39;, &#39;13394748&#39;, &#39;20587921&#39;, &#39;11337018&#39;, &#39;17568374&#39;, &#39;15742581&#39;, &#39;18659505&#39;, &#39;18397048&#39;, &#39;15848517&#39;, &#39;24544370&#39;, &#39;18218748&#39;, &#39;6129629&#39;, &#39;13135514&#39;, &#39;1141402&#39;, &#39;17410339&#39;, &#39;17450549&#39;, &#39;17451711&#39;, &#39;24510659&#39;, &#39;6965175&#39;, &#39;32327289&#39;, &#39;27344676&#39;, &#39;11290745&#39;, &#39;22006767&#39;, &#39;15743062&#39;, &#39;26200934&#39;, &#39;36364920&#39;, &#39;10794937&#39;, &#39;18680821&#39;, &#39;6355432&#39;, &#39;25989361&#39;, &#39;8502965&#39;, &#39;13319650&#39;, &#39;19404278&#39;, &#39;27810119&#39;, &#39;13580753&#39;, &#39;26788341&#39;, &#39;31574430&#39;, &#39;17351872&#39;, &#39;2253168&#39;, &#39;25392657&#39;, &#39;29800365&#39;, &#39;13509120&#39;, &#39;7740998&#39;, &#39;28447015&#39;, &#39;32804803&#39;, &#39;6748892&#39;, &#39;24548709&#39;, &#39;2297303&#39;, &#39;25150558&#39;, &#39;18340095&#39;, &#39;18493426&#39;, &#39;31864314&#39;, &#39;10002196&#39;, &#39;24420539&#39;, &#39;27037673&#39;, &#39;31114367&#39;, &#39;22713014&#39;, &#39;21841495&#39;, &#39;11143580&#39;, &#39;10754520&#39;, &#39;32598849&#39;, &#39;20929026&#39;, &#39;9269688&#39;, &#39;23362140&#39;, &#39;23588396&#39;, &#39;26099082&#39;, &#39;7350825&#39;, &#39;25665316&#39;, &#39;23664702&#39;, &#39;13617471&#39;, &#39;17984552&#39;, &#39;8564532&#39;, &#39;15860671&#39;, &#39;15768174&#39;, &#39;6496061&#39;, &#39;19509353&#39;, &#39;32196106&#39;, &#39;17280541&#39;, &#39;29093221&#39;, &#39;18040633&#39;, &#39;12819583&#39;, &#39;16116728&#39;, &#39;31285614&#39;, &#39;11417254&#39;, &#39;3310083&#39;, &#39;9325431&#39;, &#39;23347055&#39;, &#39;18488601&#39;, &#39;26939805&#39;, &#39;18218169&#39;, &#39;23116317&#39;, &#39;3188872&#39;, &#39;12016313&#39;, &#39;591213&#39;, &#39;17258791&#39;, &#39;14288439&#39;, &#39;13511506&#39;, &#39;18330911&#39;, &#39;6388432&#39;, &#39;13087601&#39;, &#39;17458734&#39;, &#39;16051061&#39;, &#39;17611372&#39;, &#39;31278743&#39;, &#39;18044174&#39;, &#39;8045417&#39;, &#39;17341321&#39;, &#39;13197222&#39;, &#39;32309194&#39;, &#39;19243721&#39;, &#39;13490034&#39;, &#39;18746499&#39;, &#39;29372056&#39;, &#39;16077194&#39;, &#39;15821439&#39;, &#39;35437810&#39;, &#39;15714522&#39;, &#39;25636642&#39;, &#39;23809341&#39;, &#39;16075864&#39;, &#39;6130950&#39;, &#39;8518234&#39;, &#39;27262439&#39;, &#39;2264130&#39;, &#39;13563330&#39;, &#39;25779553&#39;, &#39;11985087&#39;, &#39;18553527&#39;, &#39;4266322&#39;, &#39;22589511&#39;, &#39;12305738&#39;, &#39;22088011&#39;, &#39;12396771&#39;, &#39;13753712&#39;, &#39;19097400&#39;, &#39;24911818&#39;, &#39;30140875&#39;, &#39;49818&#39;, &#39;15755549&#39;, &#39;13420264&#39;, &#39;28525374&#39;, &#39;8409368&#39;, &#39;8306857&#39;, &#39;13414282&#39;, &#39;23640217&#39;, &#39;6980817&#39;, &#39;29639950&#39;, &#39;35391134&#39;, &#39;7231642&#39;, &#39;20806584&#39;, &#39;25063777&#39;, &#39;11058389&#39;, &#39;11732640&#39;, &#39;18271170&#39;, &#39;18523261&#39;, &#39;25923000&#39;, &#39;15724164&#39;, &#39;17666012&#39;, &#39;13321335&#39;, &#39;30182118&#39;, &#39;7710333&#39;, &#39;25912961&#39;, &#39;11982320&#39;, &#39;15701662&#39;, &#39;26796330&#39;, &#39;22241296&#39;, &#39;25969640&#39;, &#39;17884755&#39;, &#39;13558189&#39;, &#39;25698317&#39;, &#39;13508601&#39;, &#39;13625156&#39;, &#39;17561098&#39;, &#39;10327392&#39;, &#39;17258713&#39;, &#39;28109445&#39;, &#39;28001785&#39;, &#39;9662715&#39;, &#39;18819489&#39;, &#39;18410374&#39;, &#39;25161218&#39;, &#39;17951497&#39;, &#39;30733913&#39;, &#39;18962294&#39;, &#39;35594963&#39;, &#39;12038650&#39;, &#39;101426&#39;, &#39;25440045&#39;, &#39;8828360&#39;, &#39;2173683&#39;, &#39;24501910&#39;, &#39;17930465&#39;, &#39;16005666&#39;, &#39;17337509&#39;, &#39;7419435&#39;, &#39;24104539&#39;, &#39;30770810&#39;, &#39;865&#39;, &#39;862272&#39;, &#39;14785910&#39;, &#39;17561086&#39;, &#39;2738612&#39;, &#39;34823580&#39;, &#39;29213388&#39;, &#39;14289689&#39;, &#39;29479422&#39;, &#39;29056083&#39;, &#39;1781723&#39;, &#39;22911409&#39;, &#39;25630971&#39;, &#39;20561797&#39;, &#39;17204095&#39;, &#39;23715973&#39;, &#39;33878306&#39;, &#39;20829029&#39;, &#39;18597369&#39;, &#39;9979062&#39;, &#39;33843449&#39;, &#39;32829500&#39;, &#39;15711451&#39;, &#39;3175211&#39;, &#39;25506775&#39;, &#39;30278752&#39;, &#39;15727775&#39;, &#39;25127455&#39;, &#39;17730679&#39;, &#39;13604494&#39;, &#39;27219097&#39;, &#39;14802335&#39;, &#39;17608371&#39;, &#39;25758236&#39;, &#39;24204146&#39;, &#39;18337477&#39;, &#39;28789556&#39;, &#39;22443481&#39;, &#39;8333557&#39;, &#39;23295309&#39;, &#39;30972270&#39;, &#39;1739991&#39;, &#39;22677634&#39;, &#39;30743499&#39;, &#39;13512140&#39;, &#39;27065545&#39;, &#39;17457185&#39;, &#39;29752927&#39;, &#39;23019251&#39;, &#39;21399905&#39;, &#39;1546633&#39;, &#39;35121839&#39;, &#39;18966551&#39;, &#39;22666173&#39;, &#39;147476&#39;, &#39;20555443&#39;, &#39;18668534&#39;, &#39;19258660&#39;, &#39;18463614&#39;, &#39;17118893&#39;, &#39;32709452&#39;, &#39;24617231&#39;, &#39;6507425&#39;, &#39;16275651&#39;, &#39;13553854&#39;, &#39;24941243&#39;, &#39;12168042&#39;, &#39;6418599&#39;, &#39;333674&#39;, &#39;19203179&#39;, &#39;18052325&#39;, &#39;32196073&#39;, &#39;17698919&#39;, &#39;6148028&#39;, &#39;28550610&#39;, &#39;13330943&#39;, &#39;19248807&#39;, &#39;11549187&#39;, &#39;21797160&#39;, &#39;3360617&#39;, &#39;13376097&#39;, &#39;18224374&#39;, &#39;23201213&#39;, &#39;22031664&#39;, &#39;16154910&#39;, &#39;14796823&#39;, &#39;26076903&#39;, &#39;31831496&#39;, &#39;31200595&#39;, &#39;21028179&#39;, &#39;12955096&#39;, &#39;11436054&#39;, &#39;9637697&#39;, &#39;20614318&#39;, &#39;17456181&#39;, &#39;7442412&#39;, &#39;1137327&#39;, &#39;14762491&#39;, &#39;20742224&#39;, &#39;9460487&#39;, &#39;16039308&#39;, &#39;16060617&#39;, &#39;8391758&#39;, &#39;20761204&#39;, &#39;20821174&#39;, &#39;17384001&#39;, &#39;6475535&#39;, &#39;1328498&#39;, &#39;18071359&#39;, &#39;22438404&#39;, &#39;13456264&#39;, &#39;13082496&#39;, &#39;17666929&#39;, &#39;15182675&#39;, &#39;17159916&#39;, &#39;13578034&#39;, &#39;25066117&#39;, &#39;7092083&#39;, &#39;22550979&#39;, &#39;22944242&#39;, &#39;13687076&#39;, &#39;1281235&#39;, &#39;49773&#39;, &#39;18005662&#39;, &#39;30257299&#39;, &#39;12359421&#39;, &#39;22180850&#39;, &#39;22044746&#39;, &#39;32493793&#39;, &#39;13588543&#39;, &#39;22890011&#39;, &#39;29238847&#39;, &#39;20758225&#39;, &#39;18007564&#39;, &#39;25318594&#39;, &#39;17853242&#39;, &#39;25353247&#39;, &#39;19660884&#39;, &#39;25500233&#39;, &#39;23507&#39;, &#39;608867&#39;, &#39;18871776&#39;, &#39;18712499&#39;, &#39;13649327&#39;, &#39;70754&#39;, &#39;17371845&#39;, &#39;17564499&#39;, &#39;21414828&#39;, &#39;27557999&#39;, &#39;22466620&#39;, &#39;9809096&#39;, &#39;14762463&#39;, &#39;8479009&#39;, &#39;27515628&#39;, &#39;17563814&#39;, &#39;8515383&#39;, &#39;18798818&#39;, &#39;24590557&#39;, &#39;37449&#39;, &#39;29967520&#39;, &#39;20603758&#39;, &#39;373676&#39;, &#39;21887189&#39;, &#39;10282869&#39;, &#39;13344493&#39;, &#39;22492901&#39;, &#39;34399341&#39;, &#39;18928661&#39;, &#39;18634486&#39;, &#39;6472227&#39;, &#39;25215271&#39;, &#39;49810&#39;, &#39;28185384&#39;, &#39;28415009&#39;, &#39;16069305&#39;, &#39;22844292&#39;, &#39;12338163&#39;, &#39;23363818&#39;, &#39;21976014&#39;, &#39;18039423&#39;, &#39;13616052&#39;, &#39;19043489&#39;, &#39;2156863&#39;, &#39;13425450&#39;, &#39;15768774&#39;, &#39;16177870&#39;, &#39;7445780&#39;, &#39;17907491&#39;, &#39;32564969&#39;, &#39;31843042&#39;, &#39;25852860&#39;, &#39;8284932&#39;, &#39;11291520&#39;, &#39;23382512&#39;, &#39;4163418&#39;, &#39;12187797&#39;, &#39;34434581&#39;, &#39;17255591&#39;, &#39;9365923&#39;, &#39;24892145&#39;, &#39;25431622&#39;, &#39;12827311&#39;, &#39;24401111&#39;, &#39;34052111&#39;, &#39;26150650&#39;, &#39;26819767&#39;, &#39;16067349&#39;, &#39;15829468&#39;, &#39;185900&#39;, &#39;31538363&#39;, &#39;17322949&#39;, &#39;11143600&#39;, &#39;32500082&#39;, &#39;13408075&#39;, &#39;34858734&#39;, &#39;36381037&#39;, &#39;13068756&#39;, &#39;10327421&#39;, &#39;16039920&#39;, &#39;35079565&#39;, &#39;1498842&#39;, &#39;16058418&#39;, &#39;18481276&#39;, &#39;12250585&#39;, &#39;4266341&#39;, &#39;27876118&#39;, &#39;29069989&#39;, &#39;33526658&#39;, &#39;34230397&#39;, &#39;9489489&#39;, &#39;19064&#39;, &#39;587862&#39;, &#39;840211&#39;, &#39;26256646&#39;, &#39;983552&#39;, &#39;16018772&#39;, &#39;13645903&#39;, &#39;35525168&#39;, &#39;8101281&#39;, &#39;17986986&#39;, &#39;13589235&#39;, &#39;17290810&#39;, &#39;31561733&#39;, &#39;27190381&#39;, &#39;16156593&#39;, &#39;33845852&#39;, &#39;8846414&#39;, &#39;6039746&#39;, &#39;15983784&#39;, &#39;13562570&#39;, &#39;72193&#39;, &#39;9171146&#39;, &#39;32621564&#39;, &#39;862267&#39;, &#39;30968175&#39;, &#39;1039463&#39;, &#39;872&#39;, &#39;9361589&#39;, &#39;11344832&#39;, &#39;9745341&#39;, &#39;15751678&#39;, &#39;23559858&#39;, &#39;2711523&#39;, &#39;2657&#39;, &#39;295899&#39;, &#39;34615137&#39;, &#39;33312853&#39;, &#39;35553817&#39;, &#39;34999214&#39;, &#39;1271159&#39;, &#39;18386077&#39;, &#39;4616627&#39;, &#39;20543358&#39;, &#39;13356854&#39;, &#39;28680885&#39;, &#39;18360625&#39;, &#39;17407461&#39;, &#39;2654&#39;, &#39;18039923&#39;, &#39;13410779&#39;, &#39;12025202&#39;, &#39;25258300&#39;, &#39;17853376&#39;, &#39;12269780&#39;, &#39;23276112&#39;, &#39;19101755&#39;, &#39;19539657&#39;, &#39;32570242&#39;, &#39;8142865&#39;, &#39;13574349&#39;, &#39;13575634&#39;, &#39;29587499&#39;, &#39;12024&#39;, &#39;13063912&#39;, &#39;12382340&#39;, &#39;9365986&#39;, &#39;36110908&#39;, &#39;21956078&#39;, &#39;2264108&#39;, &#39;18190123&#39;, &#39;9629811&#39;, &#39;13612277&#39;, &#39;7014517&#39;, &#39;6015185&#39;, &#39;27858482&#39;, &#39;31298704&#39;, &#39;6573014&#39;, &#39;22088945&#39;, &#39;8722062&#39;, &#39;16292420&#39;, &#39;18086403&#39;, &#39;7077211&#39;, &#39;20307209&#39;, &#39;6633956&#39;, &#39;24111211&#39;, &#39;29242483&#39;, &#39;22703858&#39;, &#39;24822879&#39;, &#39;25309654&#39;, &#39;11149647&#39;, &#39;492286&#39;, &#39;18770574&#39;, &#39;18746856&#39;, &#39;13373663&#39;, &#39;17795506&#39;, &#39;19546752&#39;, &#39;6574803&#39;, &#39;17880024&#39;, &#39;3153393&#39;, &#39;22019906&#39;, &#39;10526094&#39;, &#39;16157474&#39;, &#39;6979801&#39;, &#39;22024583&#39;, &#39;25701321&#39;, &#39;21527585&#39;, &#39;21939020&#39;, &#39;20934720&#39;, &#39;7950150&#39;, &#39;26092775&#39;, &#39;6040381&#39;, &#39;18710449&#39;, &#39;18597421&#39;, &#39;35233095&#39;, &#39;3847055&#39;, &#39;17343716&#39;, &#39;18665249&#39;, &#39;18684947&#39;, &#39;17566731&#39;, &#39;17161949&#39;, &#39;19029961&#39;, &#39;10282880&#39;, &#39;35390821&#39;, &#39;25794765&#39;, &#39;26164740&#39;, &#39;30838324&#39;, &#39;18267158&#39;, &#39;23396682&#39;, &#39;29079827&#39;, &#39;15743071&#39;, &#39;13092575&#39;, &#39;21525121&#39;, &#39;17968365&#39;, &#39;18362734&#39;, &#39;31560002&#39;, &#39;8013752&#39;, &#39;26853362&#39;, &#39;20307223&#39;, &#39;13515350&#39;, &#39;13452143&#39;, &#39;15791627&#39;, &#39;12539591&#39;, &#39;7931168&#39;, &#39;6626070&#39;, &#39;10858973&#39;, &#39;15704149&#39;, &#39;24359582&#39;, &#39;9997510&#39;, &#39;13554812&#39;, &#39;16130437&#39;, &#39;12835106&#39;, &#39;15784152&#39;, &#39;25987480&#39;, &#39;30853073&#39;, &#39;23275109&#39;, &#39;29914433&#39;, &#39;526272&#39;, &#39;15843793&#39;, &#39;26170148&#39;, &#39;14802374&#39;, &#39;437151&#39;, &#39;2198721&#39;, &#39;17934906&#39;, &#39;45495&#39;, &#39;9212093&#39;, &#39;13234679&#39;, &#39;4478365&#39;, &#39;10244455&#39;, &#39;24718615&#39;, &#39;858351&#39;, &#39;13557703&#39;, &#39;13026021&#39;, &#39;34128781&#39;, &#39;25755787&#39;, &#39;27259778&#39;, &#39;25120177&#39;, &#39;1238901&#39;, &#39;608858&#39;, &#39;18040699&#39;, &#39;9584810&#39;, &#39;22873046&#39;, &#39;49799&#39;, &#39;12328749&#39;, &#39;13603351&#39;, &#39;28757261&#39;, &#39;15717947&#39;, &#39;23354313&#39;, &#39;8120173&#39;, &#39;1310182&#39;, &#39;19100&#39;, &#39;25370921&#39;, &#39;18983451&#39;, &#39;22038278&#39;, &#39;23018804&#39;, &#39;888945&#39;, &#39;16127939&#39;, &#39;5801016&#39;, &#39;2397465&#39;, &#39;25964074&#39;, &#39;29543528&#39;, &#39;6902967&#39;, &#39;18998388&#39;, &#39;29425003&#39;, &#39;16280929&#39;, &#39;16157187&#39;, &#39;27223386&#39;, &#39;2206723&#39;, &#39;24317333&#39;, &#39;936221&#39;, &#39;23595964&#39;, &#39;22919473&#39;, &#39;2261214&#39;, &#39;13335037&#39;, &#39;7454063&#39;, &#39;14569776&#39;, &#39;13397021&#39;, &#39;29082328&#39;, &#39;24964815&#39;, &#39;17230504&#39;, &#39;29605141&#39;, &#39;18401393&#39;, &#39;17833818&#39;, &#39;893135&#39;, &#39;18517873&#39;, &#39;25154774&#39;, &#39;35608444&#39;, &#39;33845528&#39;, &#39;20806556&#39;, &#39;28494414&#39;, &#39;296820&#39;, &#39;17557750&#39;, &#39;30517639&#39;, &#39;17308606&#39;, &#39;26803527&#39;, &#39;22370890&#39;, &#39;9309796&#39;, &#39;25477718&#39;, &#39;24490481&#39;, &#39;35378698&#39;, &#39;8039099&#39;, &#39;17152275&#39;, &#39;14574973&#39;, &#39;17845840&#39;, &#39;12104761&#39;, &#39;7095445&#39;, &#39;34823579&#39;, &#39;34510127&#39;, &#39;21726837&#39;, &#39;11738407&#39;, &#39;3407971&#39;, &#39;14739280&#39;, &#39;6405758&#39;, &#39;18190276&#39;, &#39;23607404&#39;, &#39;13509127&#39;, &#39;2983323&#39;, &#39;17857225&#39;, &#39;15736550&#39;, &#39;17540725&#39;, &#39;15818092&#39;, &#39;11112712&#39;, &#39;17187024&#39;, &#39;28176874&#39;, &#39;13530788&#39;, &#39;20309175&#39;, &#39;22398290&#39;, &#39;7645685&#39;, &#39;25214284&#39;, &#39;30982036&#39;, &#39;25147847&#39;, &#39;24612163&#39;, &#39;8720518&#39;, &#39;35383657&#39;, &#39;29757622&#39;, &#39;26856722&#39;, &#39;16412296&#39;, &#39;12027088&#39;, &#39;17794847&#39;, &#39;2287904&#39;, &#39;23502642&#39;, &#39;18219535&#39;, &#39;22614515&#39;, &#39;21934594&#39;, &#39;9859820&#39;, &#39;16125241&#39;, &#39;8763821&#39;, &#39;20447452&#39;, &#39;31187505&#39;, &#39;14290343&#39;, &#39;32054384&#39;, &#39;6906068&#39;, &#39;23392562&#39;, &#39;7364254&#39;, &#39;2261213&#39;, &#39;29496243&#39;, &#39;27838766&#39;, &#39;25310065&#39;, &#39;9969572&#39;, &#39;17859161&#39;, &#39;27224408&#39;, &#39;16692909&#39;, &#39;17134626&#39;, &#39;18815174&#39;, &#39;13643133&#39;, &#39;8409357&#39;, &#39;9452482&#39;, &#39;23551264&#39;, &#39;30532762&#39;, &#39;23315870&#39;, &#39;29880709&#39;, &#39;16084682&#39;, &#39;27263459&#39;, &#39;25231392&#39;, &#39;20910195&#39;, &#39;8574414&#39;, &#39;24705880&#39;, &#39;20945300&#39;, &#39;22828783&#39;, &#39;25804350&#39;, &#39;18010943&#39;, &#39;22263899&#39;, &#39;20612067&#39;, &#39;27396571&#39;, &#39;13557136&#39;, &#39;30078661&#39;, &#39;22622278&#39;, &#39;13582001&#39;, &#39;12547520&#39;, &#39;27168405&#39;, &#39;15715789&#39;, &#39;24781288&#39;, &#39;27869625&#39;, &#39;22455901&#39;, &#39;20222637&#39;, &#39;31417231&#39;, &#39;742576&#39;, &#39;23307757&#39;, &#39;29747283&#39;, &#39;23350847&#39;, &#39;840208&#39;, &#39;22602377&#39;, &#39;18040125&#39;, &#39;6984466&#39;, &#39;24171268&#39;, &#39;18206985&#39;, &#39;24674676&#39;, &#39;25758406&#39;, &#39;17861287&#39;, &#39;13164565&#39;, &#39;18163629&#39;, &#39;33622481&#39;, &#39;14622803&#39;, &#39;3102821&#39;, &#39;13598806&#39;, &#39;12061833&#39;, &#39;36219831&#39;, &#39;6071573&#39;, &#39;22824462&#39;, &#39;34318&#39;, &#39;23527094&#39;, &#39;29762289&#39;, &#39;6577666&#39;, &#39;24963328&#39;, &#39;16283961&#39;, &#39;26851201&#39;, &#39;25270661&#39;, &#39;28602838&#39;, &#39;45499&#39;, &#39;13613827&#39;, &#39;2195227&#39;, &#39;15747347&#39;, &#39;22857439&#39;, &#39;31030335&#39;, &#39;871224&#39;, &#39;18809355&#39;, &#39;27278972&#39;, &#39;31818515&#39;, &#39;12004870&#39;, &#39;12885649&#39;, &#39;2397472&#39;, &#39;21542483&#39;, &#39;30295420&#39;, &#39;8549012&#39;, &#39;19063&#39;, &#39;12509921&#39;, &#39;25879546&#39;, &#39;32572144&#39;, &#39;10753689&#39;, &#39;12979843&#39;, &#39;21863194&#39;, &#39;22071142&#39;, &#39;20520487&#39;, &#39;29481736&#39;, &#39;20784229&#39;, &#39;32795719&#39;, &#39;23811616&#39;, &#39;23704118&#39;, &#39;13412974&#39;, &#39;31682902&#39;, &#39;3174348&#39;, &#39;9397983&#39;, &#39;6010848&#39;, &#39;219069&#39;, &#39;18539129&#39;, &#39;13416045&#39;, &#39;30632127&#39;, &#39;18486818&#39;, &#39;17416947&#39;, &#39;35263629&#39;, &#39;13690325&#39;, &#39;18743497&#39;, &#39;25739498&#39;, &#39;29430226&#39;, &#39;35163194&#39;, &#39;14478151&#39;, &#39;18132708&#39;, &#39;22917699&#39;, &#39;28363557&#39;, &#39;34389262&#39;, &#39;18620726&#39;, &#39;165220&#39;, &#39;2711524&#39;, &#39;21904149&#39;, &#39;13451546&#39;, &#39;29636938&#39;, &#39;22723275&#39;, &#39;28946493&#39;, &#39;26055123&#39;, &#39;24862868&#39;, &#39;18596991&#39;, &#39;1808773&#39;, &#39;25908605&#39;, &#39;9692831&#39;, &#39;31836443&#39;, &#39;1261442&#39;, &#39;32596240&#39;, &#39;21473426&#39;, &#39;29346191&#39;, &#39;13617429&#39;, &#39;2638810&#39;, &#39;15745753&#39;, &#39;171797&#39;, &#39;24911870&#39;, &#39;24559146&#39;, &#39;15766140&#39;, &#39;296827&#39;, &#39;1167760&#39;, &#39;12292612&#39;, &#39;29070291&#39;, &#39;15992524&#39;, &#39;33128765&#39;, &#39;5670194&#39;, &#39;16058834&#39;, &#39;25683005&#39;, &#39;6053292&#39;, &#39;309174&#39;, &#39;20626209&#39;, &#39;29743258&#39;, &#39;27272264&#39;, &#39;26522288&#39;, &#39;17873797&#39;, &#39;22009240&#39;, &#39;18488649&#39;, &#39;1649550&#39;, &#39;26127556&#39;, &#39;13164350&#39;, &#39;15994655&#39;, &#39;12384483&#39;, &#39;29232480&#39;, &#39;24845469&#39;, &#39;11925410&#39;, &#39;821787&#39;, &#39;2699067&#39;, &#39;17616021&#39;, &#39;24298721&#39;, &#39;26046350&#39;, &#39;22019178&#39;, &#39;27231015&#39;, &#39;25728861&#39;, &#39;31283253&#39;, &#39;455033&#39;, &#39;6089760&#39;, &#39;9638604&#39;, &#39;2200815&#39;, &#39;28928335&#39;, &#39;26802550&#39;, &#39;9490473&#39;, &#39;943315&#39;, &#39;7941396&#39;, &#39;10471154&#39;, &#39;9717320&#39;, &#39;18049021&#39;, &#39;18901352&#39;, &#39;22595857&#39;, &#39;12207476&#39;, &#39;25661280&#39;, &#39;16637370&#39;, &#39;23109031&#39;, &#39;30964258&#39;, &#39;13107968&#39;, &#39;8313731&#39;, &#39;13089144&#39;, &#39;16135349&#39;, &#39;31321368&#39;, &#39;31314242&#39;, &#39;23009744&#39;, &#39;8663600&#39;, &#39;20445993&#39;, &#39;19631541&#39;, &#39;31938451&#39;, &#39;6772388&#39;, &#39;2206724&#39;, &#39;13648975&#39;, &#39;32294046&#39;, &#39;18624585&#39;, &#39;16081583&#39;, &#39;13219316&#39;, &#39;2549275&#39;, &#39;7040332&#39;, &#39;19078806&#39;, &#39;27796606&#39;, &#39;24878742&#39;, &#39;30525923&#39;, &#39;9088786&#39;, &#39;14793577&#39;, &#39;17970762&#39;, &#39;71000&#39;, &#39;17917593&#39;, &#39;18164704&#39;, &#39;6432120&#39;, &#39;13507226&#39;, &#39;27246710&#39;, &#39;28266126&#39;, &#39;6588588&#39;, &#39;24317970&#39;, &#39;15836164&#39;, &#39;13111334&#39;, &#39;35609920&#39;, &#39;3484606&#39;, &#39;25016042&#39;, &#39;17281930&#39;, &#39;31823738&#39;, &#39;13548787&#39;, &#39;14760501&#39;, &#39;13543908&#39;, &#39;30525922&#39;, &#39;28109798&#39;, &#39;17466044&#39;, &#39;31299247&#39;, &#39;836042&#39;, &#39;18044116&#39;, &#39;19505295&#39;, &#39;20958096&#39;, &#39;16165124&#39;, &#39;1904709&#39;, &#39;32326262&#39;, &#39;5514922&#39;, &#39;12279616&#39;, &#39;24856461&#39;, &#39;17906268&#39;, &#39;22880245&#39;, &#39;31856423&#39;, &#39;8128934&#39;, &#39;20809922&#39;, &#39;23547767&#39;, &#39;26068759&#39;, &#39;22586854&#39;, &#39;26829136&#39;, &#39;28525496&#39;, &#39;7838236&#39;, &#39;22091506&#39;, &#39;23691247&#39;, &#39;3242678&#39;, &#39;34236100&#39;, &#39;15743076&#39;, &#39;25233603&#39;, &#39;13796816&#39;, &#39;15848087&#39;, &#39;18273877&#39;, &#39;18333638&#39;, &#39;30365803&#39;, &#39;33630768&#39;, &#39;8332744&#39;, &#39;25500715&#39;, &#39;27885543&#39;, &#39;26308557&#39;, &#39;6080900&#39;, &#39;32914485&#39;, &#39;10385172&#39;, &#39;816815&#39;, &#39;13425880&#39;, &#39;24801569&#39;, &#39;28352417&#39;, &#39;28003656&#39;, &#39;30851062&#39;, &#39;35957356&#39;, &#39;9307599&#39;, &#39;18246707&#39;, &#39;12837725&#39;, &#39;15987042&#39;, &#39;28117517&#39;, &#39;5999963&#39;, &#39;7636293&#39;, &#39;9456961&#39;, &#39;13639293&#39;, &#39;15719757&#39;, &#39;22010842&#39;, &#39;7546830&#39;, &#39;24995028&#39;, &#39;26887962&#39;, &#39;18738782&#39;, &#39;15753836&#39;, &#39;26087530&#39;, &#39;25946362&#39;, &#39;15880&#39;, &#39;12061809&#39;, &#39;25418547&#39;, &#39;29969536&#39;, &#39;18498332&#39;, &#39;26088065&#39;, &#39;18866539&#39;, &#39;69438&#39;, &#39;5953576&#39;, &#39;23513830&#39;, &#39;23524746&#39;, &#39;4687635&#39;, &#39;22824478&#39;, &#39;21424761&#39;, &#39;25587975&#39;, &#39;31681857&#39;, &#39;10415854&#39;, &#39;587400&#39;, &#39;18104647&#39;, &#39;25088196&#39;, &#39;11990331&#39;, &#39;13141608&#39;, &#39;13497933&#39;, &#39;518844&#39;, &#39;16205681&#39;, &#39;18410187&#39;, &#39;11192675&#39;, &#39;20498963&#39;, &#39;18493699&#39;, &#39;13560379&#39;, &#39;31122073&#39;, &#39;29356081&#39;, &#39;6257502&#39;, &#39;7176054&#39;, &#39;415675&#39;, &#39;10257528&#39;, &#39;17466622&#39;, &#39;34996826&#39;, &#39;10611698&#39;, &#39;13562630&#39;, &#39;32672711&#39;, &#39;18626858&#39;, &#39;17201174&#39;}
+number of works with over 10000 reviews: 29
+number of reviews for works with over 10000 reviews: 412905
+100000 reviews parsed 2013 written
+200000 reviews parsed 4103 written
+300000 reviews parsed 6351 written
+400000 reviews parsed 8555 written
+500000 reviews parsed 10701 written
+600000 reviews parsed 12692 written
+700000 reviews parsed 14628 written
+800000 reviews parsed 16675 written
+900000 reviews parsed 18746 written
+1000000 reviews parsed 20870 written
+1100000 reviews parsed 22833 written
+1200000 reviews parsed 24898 written
+1300000 reviews parsed 26681 written
+1400000 reviews parsed 28831 written
+1500000 reviews parsed 30908 written
+1600000 reviews parsed 32997 written
+1700000 reviews parsed 35007 written
+1800000 reviews parsed 36898 written
+1900000 reviews parsed 38950 written
+2000000 reviews parsed 40817 written
+2100000 reviews parsed 42744 written
+2200000 reviews parsed 44942 written
+2300000 reviews parsed 47112 written
+2400000 reviews parsed 49475 written
+2500000 reviews parsed 51626 written
+2600000 reviews parsed 53931 written
+2700000 reviews parsed 55797 written
+2800000 reviews parsed 57756 written
+2900000 reviews parsed 59843 written
+3000000 reviews parsed 62320 written
+3100000 reviews parsed 64461 written
+3200000 reviews parsed 66572 written
+3300000 reviews parsed 68727 written
+3400000 reviews parsed 70821 written
+3500000 reviews parsed 72954 written
+3600000 reviews parsed 75265 written
+3700000 reviews parsed 77276 written
+3800000 reviews parsed 79434 written
+3900000 reviews parsed 81383 written
+4000000 reviews parsed 83573 written
+4100000 reviews parsed 85724 written
+4200000 reviews parsed 87724 written
+4300000 reviews parsed 89946 written
+4400000 reviews parsed 92127 written
+4500000 reviews parsed 94314 written
+4600000 reviews parsed 96313 written
+4700000 reviews parsed 98484 written
+4800000 reviews parsed 100492 written
+4900000 reviews parsed 102564 written
+5000000 reviews parsed 104652 written
+5100000 reviews parsed 106968 written
+5200000 reviews parsed 109106 written
+5300000 reviews parsed 111296 written
+5400000 reviews parsed 113354 written
+5500000 reviews parsed 115409 written
+5600000 reviews parsed 117487 written
+5700000 reviews parsed 119753 written
+5800000 reviews parsed 122027 written
+5900000 reviews parsed 124172 written
+6000000 reviews parsed 126501 written
+6100000 reviews parsed 128724 written
+6200000 reviews parsed 130821 written
+6300000 reviews parsed 133040 written
+6400000 reviews parsed 135462 written
+6500000 reviews parsed 137646 written
+6600000 reviews parsed 139999 written
+6700000 reviews parsed 142474 written
+6800000 reviews parsed 144780 written
+6900000 reviews parsed 147061 written
+7000000 reviews parsed 149093 written
+7100000 reviews parsed 151527 written
+7200000 reviews parsed 153774 written
+7300000 reviews parsed 156279 written
+7400000 reviews parsed 158617 written
+7500000 reviews parsed 161079 written
+7600000 reviews parsed 163102 written
+7700000 reviews parsed 165534 written
+7800000 reviews parsed 167715 written
+7900000 reviews parsed 169851 written
+8000000 reviews parsed 171990 written
+8100000 reviews parsed 174345 written
+8200000 reviews parsed 176447 written
+8300000 reviews parsed 178493 written
+8400000 reviews parsed 180749 written
+8500000 reviews parsed 182914 written
+8600000 reviews parsed 185476 written
+8700000 reviews parsed 187747 written
+8800000 reviews parsed 190244 written
+8900000 reviews parsed 192425 written
+9000000 reviews parsed 194689 written
+9100000 reviews parsed 196898 written
+9200000 reviews parsed 199171 written
+9300000 reviews parsed 201383 written
+9400000 reviews parsed 203584 written
+9500000 reviews parsed 205613 written
+9600000 reviews parsed 208139 written
+9700000 reviews parsed 210200 written
+9800000 reviews parsed 212082 written
+9900000 reviews parsed 214407 written
+10000000 reviews parsed 216429 written
+10100000 reviews parsed 218879 written
+10200000 reviews parsed 221157 written
+10300000 reviews parsed 223389 written
+10400000 reviews parsed 225595 written
+10500000 reviews parsed 227881 written
+10600000 reviews parsed 230155 written
+10700000 reviews parsed 232567 written
+10800000 reviews parsed 234743 written
+10900000 reviews parsed 237046 written
+11000000 reviews parsed 239503 written
+11100000 reviews parsed 241727 written
+11200000 reviews parsed 244201 written
+11300000 reviews parsed 246430 written
+11400000 reviews parsed 248960 written
+11500000 reviews parsed 251349 written
+11600000 reviews parsed 253614 written
+11700000 reviews parsed 255938 written
+11800000 reviews parsed 258210 written
+11900000 reviews parsed 260196 written
+12000000 reviews parsed 262362 written
+12100000 reviews parsed 264689 written
+12200000 reviews parsed 267016 written
+12300000 reviews parsed 269351 written
+12400000 reviews parsed 271443 written
+12500000 reviews parsed 273787 written
+12600000 reviews parsed 276068 written
+12700000 reviews parsed 278134 written
+12800000 reviews parsed 280214 written
+12900000 reviews parsed 282462 written
+13000000 reviews parsed 284555 written
+13100000 reviews parsed 286804 written
+13200000 reviews parsed 289258 written
+13300000 reviews parsed 291719 written
+13400000 reviews parsed 294020 written
+13500000 reviews parsed 296323 written
+13600000 reviews parsed 298409 written
+13700000 reviews parsed 300271 written
+13800000 reviews parsed 302678 written
+13900000 reviews parsed 304861 written
+14000000 reviews parsed 307088 written
+14100000 reviews parsed 309131 written
+14200000 reviews parsed 311246 written
+14300000 reviews parsed 313573 written
+14400000 reviews parsed 315823 written
+14500000 reviews parsed 318158 written
+14600000 reviews parsed 320361 written
+14700000 reviews parsed 322520 written
+14800000 reviews parsed 324702 written
+14900000 reviews parsed 326827 written
+15000000 reviews parsed 330967 written
+15100000 reviews parsed 335467 written
+15200000 reviews parsed 340097 written
+15300000 reviews parsed 345419 written
+15400000 reviews parsed 349807 written
+15500000 reviews parsed 354202 written
+15600000 reviews parsed 358680 written
+15700000 reviews parsed 362824 written
+15739967 reviews parsed 364653 written
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[77]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">counts</span><span class="p">[</span><span class="n">counts</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">book_ids</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">work_ids</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">mapping</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+<span class="n">review_df</span><span class="o">.</span><span class="n">columns</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>0 0 0
 </pre>
 </div>
 </div>
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[40]:</div>
+    <div class="prompt output_prompt">Out[77]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[&#39;a2d6dd1685e5aa0a72c9410f8f55e056&#39;,
- &#39;4922591667fd3e8adc0c5e3d42cf557a&#39;,
- &#39;459a6c4decf925aedd08e45045c0d8c6&#39;,
- &#39;dd9785b14664103617304996541ed77a&#39;,
- &#39;9003d274774f4c47e62f77600b08ac1d&#39;,
- &#39;843a44e2499ba9362b47a089b0b0ce75&#39;,
- &#39;b7772313835ce6257a3fbe7ad2649a29&#39;,
- &#39;795595616d3dbd81bd16b617c9a1fa48&#39;,
- &#39;8bb031b637de69eba020a8a466d1110b&#39;,
- &#39;8e7e5b546a63cb9add8431ee6914cf59&#39;,
- &#39;6ac35fe952c608da50153d64f616291b&#39;,
- &#39;a45fb5d39a6a9857ff8362900790510a&#39;]</pre>
+<pre>Index([&#39;user_id&#39;, &#39;book_id&#39;, &#39;review_id&#39;, &#39;rating&#39;, &#39;date_added&#39;,
+       &#39;date_updated&#39;, &#39;read_at&#39;, &#39;started_at&#39;, &#39;n_votes&#39;, &#39;n_comments&#39;,
+       &#39;review_length&#39;, &#39;work_id&#39;],
+      dtype=&#39;object&#39;)</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[88]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">counts</span> <span class="o">=</span> <span class="n">review_df</span><span class="o">.</span><span class="n">user_id</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+
+<span class="n">threshold</span> <span class="o">=</span> <span class="mi">5000</span>
+<span class="n">users_above_5k</span> <span class="o">=</span> <span class="p">[</span><span class="n">user_id</span> <span class="k">for</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">[</span><span class="n">counts</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">]</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()]</span>
+<span class="n">book_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">review_df</span><span class="p">[</span><span class="n">review_df</span><span class="o">.</span><span class="n">user_id</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">users_above_5k</span><span class="p">)]</span><span class="o">.</span><span class="n">book_id</span><span class="p">)</span>
+<span class="n">work_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">review_df</span><span class="p">[</span><span class="n">review_df</span><span class="o">.</span><span class="n">user_id</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">users_above_5k</span><span class="p">)]</span><span class="o">.</span><span class="n">work_id</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">users_above_5k</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">book_ids</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">work_ids</span><span class="p">))</span>
+<span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">book_id</span><span class="p">):</span> <span class="n">work_id</span> <span class="k">for</span> <span class="n">book_id</span><span class="p">,</span> <span class="n">work_id</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">book_ids</span><span class="p">,</span> <span class="n">work_ids</span><span class="p">)}</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;number of users with over </span><span class="si">{threshold}</span><span class="s1"> reviews:&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="n">counts</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">]))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;number of reviews for users with over </span><span class="si">{threshold}</span><span class="s1"> reviews:&#39;</span><span class="p">,</span> <span class="nb">sum</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="n">counts</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">]))</span>
+
+<span class="n">data_dir</span> <span class="o">=</span> <span class="s1">&#39;/Volumes/Samsung_T5/Data/Book-Reviews/GoodReads/&#39;</span>
+<span class="n">sample_review_text_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s1">&#39;goodreads_reviews-reviewers_above_5k_reviews.csv.gz&#39;</span><span class="p">)</span> <span class="c1"># includes text</span>
+
+<span class="n">headers</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;user_id&#39;</span><span class="p">,</span> <span class="s1">&#39;book_id&#39;</span><span class="p">,</span> <span class="s1">&#39;work_id&#39;</span><span class="p">,</span> <span class="s1">&#39;review_id&#39;</span><span class="p">,</span> <span class="s1">&#39;rating&#39;</span><span class="p">,</span> <span class="s1">&#39;date_added&#39;</span><span class="p">,</span> <span class="s1">&#39;date_updated&#39;</span><span class="p">,</span> <span class="s1">&#39;read_at&#39;</span><span class="p">,</span> <span class="s1">&#39;started_at&#39;</span><span class="p">,</span> 
+    <span class="s1">&#39;n_votes&#39;</span><span class="p">,</span> <span class="s1">&#39;n_comments&#39;</span><span class="p">,</span> <span class="s1">&#39;review_length&#39;</span><span class="p">,</span> <span class="s1">&#39;review_lang&#39;</span><span class="p">,</span> <span class="s1">&#39;review_text&#39;</span><span class="p">,</span> <span class="s1">&#39;review_lang&#39;</span>
+<span class="p">]</span>
+
+
+<span class="k">with</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">sample_review_text_file</span><span class="p">,</span> <span class="s1">&#39;wt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+    <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">fh</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">headers</span><span class="p">)</span>
+    <span class="n">written</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">ri</span><span class="p">,</span> <span class="n">review</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">read_csv</span><span class="p">(</span><span class="n">review_text_file</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">ri</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">100000</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">ri</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;reviews parsed&#39;</span><span class="p">,</span> <span class="n">written</span><span class="p">,</span> <span class="s1">&#39;written&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">review</span><span class="p">[</span><span class="s1">&#39;user_id&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">users_above_5k</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">review</span><span class="p">[</span><span class="s1">&#39;work_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapping</span><span class="p">[</span><span class="n">review</span><span class="p">[</span><span class="s1">&#39;book_id&#39;</span><span class="p">]]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">written</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">review</span><span class="p">[</span><span class="s1">&#39;review_lang&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lang_detect</span><span class="p">(</span><span class="n">review</span><span class="p">)</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="p">[</span><span class="n">review</span><span class="p">[</span><span class="n">header</span><span class="p">]</span> <span class="k">for</span> <span class="n">header</span> <span class="ow">in</span> <span class="n">headers</span><span class="p">]</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ri</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;reviews parsed&#39;</span><span class="p">,</span> <span class="n">written</span><span class="p">,</span> <span class="s1">&#39;written&#39;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[&#39;a2d6dd1685e5aa0a72c9410f8f55e056&#39;, &#39;459a6c4decf925aedd08e45045c0d8c6&#39;, &#39;4922591667fd3e8adc0c5e3d42cf557a&#39;, &#39;dd9785b14664103617304996541ed77a&#39;, &#39;843a44e2499ba9362b47a089b0b0ce75&#39;, &#39;9003d274774f4c47e62f77600b08ac1d&#39;, &#39;b7772313835ce6257a3fbe7ad2649a29&#39;, &#39;8bb031b637de69eba020a8a466d1110b&#39;, &#39;8e7e5b546a63cb9add8431ee6914cf59&#39;, &#39;6ac35fe952c608da50153d64f616291b&#39;, &#39;795595616d3dbd81bd16b617c9a1fa48&#39;, &#39;a45fb5d39a6a9857ff8362900790510a&#39;, &#39;60982541be85a0611e9634b4f63d0cb0&#39;, &#39;97e2ce2141fa1c880967d78aec3c14fa&#39;, &#39;422e76592e2717d5d59465d22d74d47c&#39;, &#39;59151b639f247aa97fffd5c71701db29&#39;, &#39;e5905d648022af7b1309d82a1f4d255b&#39;, &#39;37b3e60b4e4152c580fd798d405150ff&#39;, &#39;d8c39b3b11bb2da1c1d5c39f49669dea&#39;]
+148355
+148355
+number of users with over 5000 reviews: 19
+number of reviews for users with over 5000 reviews: 148355
+100000 reviews parsed 3848 written
+200000 reviews parsed 3848 written
+300000 reviews parsed 3848 written
+400000 reviews parsed 9192 written
+500000 reviews parsed 9192 written
+600000 reviews parsed 9192 written
+700000 reviews parsed 13847 written
+800000 reviews parsed 13847 written
+900000 reviews parsed 13847 written
+1000000 reviews parsed 13847 written
+1100000 reviews parsed 21612 written
+1200000 reviews parsed 21612 written
+1300000 reviews parsed 31667 written
+1400000 reviews parsed 31667 written
+1500000 reviews parsed 31667 written
+1600000 reviews parsed 31667 written
+1700000 reviews parsed 31667 written
+1800000 reviews parsed 36645 written
+1900000 reviews parsed 36645 written
+2000000 reviews parsed 36645 written
+2100000 reviews parsed 36645 written
+2200000 reviews parsed 36645 written
+2300000 reviews parsed 36645 written
+2400000 reviews parsed 36645 written
+2500000 reviews parsed 36645 written
+2600000 reviews parsed 36645 written
+2700000 reviews parsed 46162 written
+2800000 reviews parsed 46162 written
+2900000 reviews parsed 46162 written
+3000000 reviews parsed 46162 written
+3100000 reviews parsed 46162 written
+3200000 reviews parsed 46162 written
+3300000 reviews parsed 46162 written
+3400000 reviews parsed 46162 written
+3500000 reviews parsed 46162 written
+3600000 reviews parsed 46162 written
+3700000 reviews parsed 46162 written
+3800000 reviews parsed 46162 written
+3900000 reviews parsed 46162 written
+4000000 reviews parsed 46162 written
+4100000 reviews parsed 46162 written
+4200000 reviews parsed 46162 written
+4300000 reviews parsed 46162 written
+4400000 reviews parsed 46162 written
+4500000 reviews parsed 46162 written
+4600000 reviews parsed 46162 written
+4700000 reviews parsed 46162 written
+4800000 reviews parsed 53718 written
+4900000 reviews parsed 53718 written
+5000000 reviews parsed 53718 written
+5100000 reviews parsed 53718 written
+5200000 reviews parsed 53718 written
+5300000 reviews parsed 53718 written
+5400000 reviews parsed 53718 written
+5500000 reviews parsed 53718 written
+5600000 reviews parsed 53718 written
+5700000 reviews parsed 53718 written
+5800000 reviews parsed 53718 written
+5900000 reviews parsed 53718 written
+6000000 reviews parsed 53718 written
+6100000 reviews parsed 53718 written
+6200000 reviews parsed 53718 written
+6300000 reviews parsed 59065 written
+6400000 reviews parsed 59065 written
+6500000 reviews parsed 59065 written
+6600000 reviews parsed 59065 written
+6700000 reviews parsed 59065 written
+6800000 reviews parsed 59065 written
+6900000 reviews parsed 61004 written
+7000000 reviews parsed 64257 written
+7100000 reviews parsed 64257 written
+7200000 reviews parsed 64257 written
+7300000 reviews parsed 64257 written
+7400000 reviews parsed 64257 written
+7500000 reviews parsed 64257 written
+7600000 reviews parsed 64257 written
+7700000 reviews parsed 64257 written
+7800000 reviews parsed 64257 written
+7900000 reviews parsed 64257 written
+8000000 reviews parsed 64257 written
+8100000 reviews parsed 64257 written
+8200000 reviews parsed 64257 written
+8300000 reviews parsed 69248 written
+8400000 reviews parsed 69248 written
+8500000 reviews parsed 69248 written
+8600000 reviews parsed 69248 written
+8700000 reviews parsed 69248 written
+8800000 reviews parsed 69248 written
+8900000 reviews parsed 69248 written
+9000000 reviews parsed 69248 written
+9100000 reviews parsed 69248 written
+9200000 reviews parsed 69248 written
+9300000 reviews parsed 69248 written
+9400000 reviews parsed 69248 written
+9500000 reviews parsed 74090 written
+9600000 reviews parsed 74090 written
+9700000 reviews parsed 79621 written
+9800000 reviews parsed 101432 written
+9900000 reviews parsed 101432 written
+10000000 reviews parsed 101432 written
+10100000 reviews parsed 101432 written
+10200000 reviews parsed 101432 written
+10300000 reviews parsed 106380 written
+10400000 reviews parsed 106380 written
+10500000 reviews parsed 106380 written
+10600000 reviews parsed 106380 written
+10700000 reviews parsed 106380 written
+10800000 reviews parsed 106380 written
+10900000 reviews parsed 106380 written
+11000000 reviews parsed 106380 written
+11100000 reviews parsed 106380 written
+11200000 reviews parsed 106380 written
+11300000 reviews parsed 106380 written
+11400000 reviews parsed 106380 written
+11500000 reviews parsed 111476 written
+11600000 reviews parsed 111476 written
+11700000 reviews parsed 111476 written
+11800000 reviews parsed 111476 written
+11900000 reviews parsed 111476 written
+12000000 reviews parsed 111476 written
+12100000 reviews parsed 111476 written
+12200000 reviews parsed 111476 written
+12300000 reviews parsed 119416 written
+12400000 reviews parsed 119416 written
+12500000 reviews parsed 119416 written
+12600000 reviews parsed 119416 written
+12700000 reviews parsed 119416 written
+12800000 reviews parsed 119416 written
+12900000 reviews parsed 119416 written
+13000000 reviews parsed 119416 written
+13100000 reviews parsed 119416 written
+13200000 reviews parsed 119416 written
+13300000 reviews parsed 119416 written
+13400000 reviews parsed 119416 written
+13500000 reviews parsed 119416 written
+13600000 reviews parsed 119416 written
+13700000 reviews parsed 126470 written
+13800000 reviews parsed 126470 written
+13900000 reviews parsed 126470 written
+14000000 reviews parsed 126470 written
+14100000 reviews parsed 126470 written
+14200000 reviews parsed 126470 written
+14300000 reviews parsed 126470 written
+14400000 reviews parsed 126470 written
+14500000 reviews parsed 126470 written
+14600000 reviews parsed 126470 written
+14700000 reviews parsed 126470 written
+14800000 reviews parsed 130938 written
+14900000 reviews parsed 130938 written
+15000000 reviews parsed 130938 written
+15100000 reviews parsed 130938 written
+15200000 reviews parsed 130938 written
+15300000 reviews parsed 130938 written
+15400000 reviews parsed 130938 written
+15500000 reviews parsed 130938 written
+15600000 reviews parsed 130938 written
+15700000 reviews parsed 130938 written
+15739967 reviews parsed 130938 written
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[87]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span> 
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[87]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>user_id</th>
+      <th>book_id</th>
+      <th>review_id</th>
+      <th>rating</th>
+      <th>date_added</th>
+      <th>date_updated</th>
+      <th>read_at</th>
+      <th>started_at</th>
+      <th>n_votes</th>
+      <th>n_comments</th>
+      <th>review_length</th>
+      <th>work_id</th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+</div>
 </div>
 
 </div>
@@ -14064,8 +14605,8 @@ number of reviews for users with over 5000 reviews: 98208
 <span class="n">sample_review_text_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s1">&#39;goodreads_reviews-random_sample_1M.csv.gz&#39;</span><span class="p">)</span> <span class="c1"># includes text</span>
 
 <span class="n">headers</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;user_id&#39;</span><span class="p">,</span> <span class="s1">&#39;book_id&#39;</span><span class="p">,</span> <span class="s1">&#39;review_id&#39;</span><span class="p">,</span> <span class="s1">&#39;rating&#39;</span><span class="p">,</span> <span class="s1">&#39;date_added&#39;</span><span class="p">,</span> <span class="s1">&#39;date_updated&#39;</span><span class="p">,</span> <span class="s1">&#39;read_at&#39;</span><span class="p">,</span> <span class="s1">&#39;started_at&#39;</span><span class="p">,</span> 
-    <span class="s1">&#39;n_votes&#39;</span><span class="p">,</span> <span class="s1">&#39;n_comments&#39;</span><span class="p">,</span> <span class="s1">&#39;review_length&#39;</span><span class="p">,</span> <span class="s1">&#39;review_text&#39;</span>
+    <span class="s1">&#39;user_id&#39;</span><span class="p">,</span> <span class="s1">&#39;book_id&#39;</span><span class="p">,</span> <span class="s1">&#39;work_id&#39;</span><span class="p">,</span> <span class="s1">&#39;review_id&#39;</span><span class="p">,</span> <span class="s1">&#39;rating&#39;</span><span class="p">,</span> <span class="s1">&#39;date_added&#39;</span><span class="p">,</span> <span class="s1">&#39;date_updated&#39;</span><span class="p">,</span> <span class="s1">&#39;read_at&#39;</span><span class="p">,</span> <span class="s1">&#39;started_at&#39;</span><span class="p">,</span> 
+    <span class="s1">&#39;n_votes&#39;</span><span class="p">,</span> <span class="s1">&#39;n_comments&#39;</span><span class="p">,</span> <span class="s1">&#39;review_length&#39;</span><span class="p">,</span> <span class="s1">&#39;review_lang&#39;</span><span class="p">,</span> <span class="s1">&#39;review_text&#39;</span><span class="p">,</span> <span class="s1">&#39;review_lang&#39;</span>
 <span class="p">]</span>
 
 <span class="n">threshold</span> <span class="o">=</span> <span class="mi">1000000</span>
@@ -14077,6 +14618,7 @@ number of reviews for users with over 5000 reviews: 98208
     <span class="k">for</span> <span class="n">review</span> <span class="ow">in</span> <span class="n">read_csv</span><span class="p">(</span><span class="n">review_text_file</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">prob_threshold</span><span class="p">:</span>
             <span class="k">continue</span>
+        <span class="n">review</span><span class="p">[</span><span class="s1">&#39;review_lang&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lang_detect</span><span class="p">(</span><span class="n">review</span><span class="p">)</span>
         <span class="n">row</span> <span class="o">=</span> <span class="p">[</span><span class="n">review</span><span class="p">[</span><span class="n">header</span><span class="p">]</span> <span class="k">for</span> <span class="n">header</span> <span class="ow">in</span> <span class="n">headers</span><span class="p">]</span>
         <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
 </pre></div>
