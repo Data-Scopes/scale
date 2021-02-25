@@ -4,6 +4,8 @@ Beyond workshops on Data Scopes, we have also organised workshops and hands-on s
 
 - Digital Humanities; Tool & Methods - 2021-03-02 (DH MA Rijks Universiteit Groningen)
     - [Slides]()
-    - [Notebook TF\*IDF and Social Media Texts](https://github.com/Data-Scopes/scale/blob/master/Workshops/Tool-Criticism/Tool-Criticism-TF-IDF-Social-Media-Text.ipynb)
-    - [Notebook Sentiment Analysis and Social Media Texts](https://github.com/Data-Scopes/scale/blob/master/Workshops/Tool-Criticism/Tool-Criticism-Sentiment-Social-Media-Text.ipynb)
+    - [Notebook TF\*IDF and Social Media Texts](https://github.com/Data-Scopes/scale/blob/master/Workshops/Tool-Criticism/Tool-Criticism-TF-IDF-Social-Media-Text.ipynb) ([via NB Viewer](https://nbviewer.jupyter.org/github/Data-Scopes/scale/blob/master/Workshops/Tool-Criticism/Tool-Criticism-TF-IDF-Social-Media-Text.ipynb))
+    - [Notebook Sentiment Analysis and Social Media Texts](https://github.com/Data-Scopes/scale/blob/master/Workshops/Tool-Criticism/Tool-Criticism-Sentiment-Social-Media-Text.ipynb) ([via NB Viewer](https://nbviewer.jupyter.org/github/Data-Scopes/scale/blob/master/Workshops/Tool-Criticism/Tool-Criticism-Sentiment-Social-Media-Text.ipynb))
     - [Data + Notebooks as zip](https://surfdrive.surf.nl/files/index.php/s/yg6mJgugsM41dKI)
+
+
