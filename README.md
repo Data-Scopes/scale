@@ -67,6 +67,11 @@ The EMLO dataset is described in:
 
 - Howard Hotson, Thomas Wallnig (2019). Reassembling the Republic of Letters in the Digital Age - Standards, Systems, Scholarship. Göttingen University Press. ISBN: 978-3-86395-403-1. Available at: [https://univerlag.uni-goettingen.de/bitstream/handle/3/isbn-978-3-86395-403-1/cost_hotson.pdf?sequence=6&](https://univerlag.uni-goettingen.de/bitstream/handle/3/isbn-978-3-86395-403-1/cost_hotson.pdf?sequence=6&)
 
+
+### Tool Criticism Workshops
+
+An [overview of related Tool Criticism workshops and materials](./Workshops/index.md).
+
 ### About Data Scopes
 
 Data Scopes is a project by [Marijn Koolen](https://marijnkoolen.com) and [Rik Hoekstra](https://www.researchgate.net/profile/Rik_Hoekstra), both at the [Humanities Cluster](https://huc.knaw.nl) of the [Royal Netherlands Academy of Arts and Sciences](https://knaw.nl/nl).
